@@ -13,6 +13,7 @@ export default function Home() {
   const [originalImage, setOriginalImage] = useState(null);
   const [error, setError] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [redemptionOptions, setRedemptionOptions] = useState([
     { id: 1, title: '基础版', price: '2.99元', description: '1张兑换码', icon: '✨', value: 1 },
@@ -20,6 +21,90 @@ export default function Home() {
     { id: 3, title: '高级版', price: '19.99元', description: '10张兑换码', icon: '🌟', value: 10 },
     { id: 4, title: '批量版', price: '联系我们', description: '20张以上', icon: '📞', value: 20 },
   ]);
+
+  // 从 localStorage 获取购买历史
+  const [purchaseHistory, setPurchaseHistory] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedHistory = localStorage.getItem('purchaseHistory');
+      return savedHistory ? JSON.parse(savedHistory) : [];
+    }
+    return [];
+  });
+
+  // 保存购买历史到 localStorage
+  const saveHistoryToStorage = (newHistory) => {
+    setPurchaseHistory(newHistory);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('purchaseHistory', JSON.stringify(newHistory));
+    }
+  };
+
+  // 更新兑换码函数
+  const updateCode = (newCode) => {
+    setCode(newCode);
+  };
+
+  // 生成兑换码
+  const generateRedemptionCode = (packageType) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  // 处理购买
+  const handlePayment = async (option) => {
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      if (option.id === 4) {
+        // 如果选择批量版，直接跳转到联系页面
+        window.location.href = '/contact';
+        setShowPayment(false);
+        return;
+      }
+
+      // 生成兑换码
+      const newCode = generateRedemptionCode(option.title);
+
+      // 创建购买记录
+      const purchaseRecord = {
+        id: Date.now(),
+        code: newCode,
+        type: option.title,
+        timestamp: new Date().toLocaleString('zh-CN'),
+        price: option.price
+      };
+
+      // 更新购买历史
+      const updatedHistory = [purchaseRecord, ...purchaseHistory].slice(0, 10);
+      saveHistoryToStorage(updatedHistory);
+
+      // 关闭支付弹窗，填入兑换码
+      setShowPayment(false);
+      setCode(newCode);
+
+      // 显示成功提示
+      alert(`购买成功！兑换码已自动填入：${newCode}`);
+    } catch (err) {
+      setError(err.message || '购买失败，请稍后重试');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  // 复制兑换码到剪贴板
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('兑换码已复制到剪贴板！');
+    }).catch(err => {
+      console.error('复制失败', err);
+      alert('复制失败，请手动复制');
+    });
+  };
 
   useEffect(() => {
     // Fetch some gallery items for preview
@@ -95,27 +180,6 @@ export default function Home() {
     }
   };
 
-  const handlePayment = async (option) => {
-    setPaymentLoading(true);
-    setError('');
-
-    try {
-      if (option.id === 4) {
-        // 如果选择批量版，直接跳转到联系页面
-        window.location.href = '/contact';
-        setShowPayment(false);
-        return;
-      }
-
-      // Mock payment processing
-      alert(`已创建支付订单：购买${option.title}，总计 ${option.price}`);
-      setShowPayment(false);
-    } catch (err) {
-      setError(err.message || '支付失败，请稍后重试');
-    } finally {
-      setPaymentLoading(false);
-    }
-  };
 
   return (
     <div className={styles.container}>
@@ -132,7 +196,6 @@ export default function Home() {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLinkActive}>首页</Link>
-          <Link href="/gallery" className={styles.navLink}>作品展示</Link>
           <Link href="/contact" className={styles.navLink}>联系我们</Link>
         </div>
       </nav>
@@ -317,9 +380,7 @@ export default function Home() {
           </div>
         </div>
         <div className={styles.galleryCTA}>
-          <Link href="/gallery" className={styles.ctaSecondary}>
-            查看更多作品
-          </Link>
+          <p className={styles.galleryDescription}>更多作品将在后续版本中展示</p>
         </div>
       </section>
 
@@ -381,26 +442,91 @@ export default function Home() {
               {showPayment && (
                 <div className={styles.paymentModal} onClick={() => setShowPayment(false)}>
                   <div className={styles.paymentContent} onClick={(e) => e.stopPropagation()}>
-                    <h3>购买兑换码</h3>
-                    <div className={styles.paymentOptions}>
-                      {redemptionOptions.map((option) => (
-                        <div key={option.id} className={styles.paymentOption}>
-                          <div className={styles.paymentOptionHeader}>
-                            <span className={styles.paymentOptionIcon}>{option.icon}</span>
-                            <h4>{option.title}</h4>
-                          </div>
-                          <div className={styles.paymentOptionPrice}>{option.price}</div>
-                          <p className={styles.paymentOptionDescription}>{option.description}</p>
-                          <button
-                            className={styles.paymentOptionButton}
-                            onClick={() => handlePayment(option)}
-                            disabled={paymentLoading}
-                          >
-                            {option.id === 4 ? '联系我们' : '立即购买'}
-                          </button>
-                        </div>
-                      ))}
+                    <div className={styles.paymentHeader}>
+                      <h3>购买兑换码</h3>
+                      <div className={styles.paymentTabs}>
+                        <button
+                          className={`${styles.paymentTab} ${!showHistory ? styles.activeTab : ''}`}
+                          onClick={() => setShowHistory(false)}
+                        >
+                          购买套餐
+                        </button>
+                        <button
+                          className={`${styles.paymentTab} ${showHistory ? styles.activeTab : ''}`}
+                          onClick={() => setShowHistory(true)}
+                        >
+                          购买历史
+                        </button>
+                      </div>
                     </div>
+
+                    {!showHistory ? (
+                      <div className={styles.paymentOptions}>
+                        {redemptionOptions.map((option) => (
+                          <div key={option.id} className={styles.paymentOption}>
+                            <div className={styles.paymentOptionHeader}>
+                              <span className={styles.paymentOptionIcon}>{option.icon}</span>
+                              <h4>{option.title}</h4>
+                            </div>
+                            <div className={styles.paymentOptionPrice}>{option.price}</div>
+                            <p className={styles.paymentOptionDescription}>{option.description}</p>
+                            <button
+                              className={styles.paymentOptionButton}
+                              onClick={() => handlePayment(option)}
+                              disabled={paymentLoading}
+                            >
+                              {option.id === 4 ? '联系我们' : '立即购买'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={styles.purchaseHistory}>
+                        <h4>购买历史</h4>
+                        {purchaseHistory.length > 0 ? (
+                          <div className={styles.historyTable}>
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>兑换码</th>
+                                  <th>类型</th>
+                                  <th>购买时间</th>
+                                  <th>操作</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {purchaseHistory.map((record) => (
+                                  <tr key={record.id}>
+                                    <td className={styles.codeCell}>{record.code}</td>
+                                    <td>{record.type}</td>
+                                    <td>{record.timestamp}</td>
+                                    <td>
+                                      <button
+                                        className={styles.copyButton}
+                                        onClick={() => copyToClipboard(record.code)}
+                                      >
+                                        复制
+                                      </button>
+                                      <button
+                                        className={styles.useButton}
+                                        onClick={() => {
+                                          setCode(record.code);
+                                          setShowPayment(false);
+                                        }}
+                                      >
+                                        使用
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className={styles.noHistory}>暂无购买历史</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

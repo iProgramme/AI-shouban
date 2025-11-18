@@ -52,7 +52,6 @@ export default function FAQ() {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLink}>首页</Link>
-          <Link href="/gallery" className={styles.navLink}>作品展示</Link>
           <Link href="/contact" className={styles.navLink}>联系我们</Link>
         </div>
       </nav>
