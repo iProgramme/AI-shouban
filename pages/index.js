@@ -17,10 +17,10 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [redemptionOptions, setRedemptionOptions] = useState([
-    { id: 1, price: '2.99元', description: '可生成1张图片', value: 1 },
-    { id: 2, price: '7.99元', description: '可生成3张图片', value: 3 },
-    { id: 3, price: '19.99元', description: '可生成10张图片', value: 10 },
-    { id: 4, price: '联系我们', description: '可生成20张以上', value: 20 },
+    { id: 1, price: '2.99元', description: '1张', value: 1 },
+    { id: 2, price: '7.99元', description: '3张', value: 3 },
+    { id: 3, price: '19.99元', description: '10张', value: 10 },
+    { id: 4, price: '联系我们', description: '20张以上', value: 20 },
   ]);
 
   // 从 localStorage 获取购买历史
@@ -486,16 +486,13 @@ export default function Home() {
                     {!showHistory ? (
                       <div className={styles.paymentOptions}>
                         {redemptionOptions.map((option) => (
-                          <div key={option.id} className={styles.paymentOption}>
+                          <div
+                            key={option.id}
+                            className={styles.paymentOption}
+                            onClick={() => !paymentLoading && handlePayment(option)}
+                          >
                             <div className={styles.paymentOptionPrice}>{option.price}</div>
                             <p className={styles.paymentOptionDescription}>{option.description}</p>
-                            <button
-                              className={styles.paymentOptionButton}
-                              onClick={() => handlePayment(option)}
-                              disabled={paymentLoading}
-                            >
-                              {option.id === 4 ? '联系我们' : '立即购买'}
-                            </button>
                           </div>
                         ))}
                         <div className={styles.contactSection}>

@@ -838,7 +838,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  background: hsl(var(--foreground) / 0.5); /* 使用主题前景色半透版 */
   backdrop-filter: blur(10px); /* 增加模糊效果 */
   -webkit-backdrop-filter: blur(10px); /* Safari 兼容性 */
   display: flex;
@@ -855,7 +855,7 @@
 }
 
 .paymentContent {
-  background: rgba(255, 255, 255, 0.15); /* 半透明背景 */
+  background: hsl(var(--card)); /* 主题卡片背景色 */
   backdrop-filter: blur(12px); /* 毛玻璃效果 */
   -webkit-backdrop-filter: blur(12px); /* Safari 兼容性 */
   border-radius: calc(var(--radius) * 3);
@@ -864,10 +864,10 @@
   max-width: 600px; /* 调整更窄的宽度 */
   max-height: 80vh; /* 增加最大高度 */
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 现代化阴影 */
-  border: 1px solid rgba(255, 255, 255, 0.18); /* 半透明边框 */
+  box-shadow: var(--shadow-2xl); /* 使用主题阴影 */
+  border: 1px solid hsl(var(--border)); /* 使用主题边框色 */
   animation: slideUp 0.3s ease;
-  color: white; /* 白色文字以适应半透明背景 */
+  color: hsl(var(--foreground)); /* 主题前景色 */
 }
 
 @keyframes slideUp {
@@ -889,8 +889,8 @@
 }
 
 .paymentOption {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
   border-radius: calc(var(--radius) * 2);
   padding: 1rem;
   text-align: center;
@@ -903,10 +903,14 @@
 }
 
 .paymentOption:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: hsl(var(--muted));
   border-color: hsl(var(--primary));
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+.paymentOption:active {
+  transform: translateY(0);
 }
 
 .paymentOptionPrice {
@@ -918,44 +922,12 @@
 }
 
 .paymentOptionDescription {
-  color: rgba(255, 255, 255, 0.7);
+  color: hsl(var(--muted-foreground));
   margin: 0.25rem 0 0.5rem;
   font-size: 0.9rem;
   text-align: center;
 }
 
-.paymentOptionPrice {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: hsl(var(--primary));
-  margin: 0.25rem 0;
-  text-align: center;
-}
-
-.paymentOptionDescription {
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0.25rem 0 0.5rem;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.paymentOptionButton {
-  width: 100%;
-  padding: 0.875rem;
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  border: none;
-  border-radius: calc(var(--radius) * 2);
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  margin-top: auto;
-}
-
-.paymentOptionButton:hover {
-  background: hsl(var(--primary) / 0.9);
-  transform: translateY(-2px);
-}
 
 .contactSection {
   text-align: center;
@@ -965,7 +937,7 @@
 }
 
 .contactQuestion {
-  color: rgba(255, 255, 255, 0.7);
+  color: hsl(var(--muted-foreground));
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
 }
