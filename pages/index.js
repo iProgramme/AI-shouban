@@ -17,10 +17,10 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [redemptionOptions, setRedemptionOptions] = useState([
-    { id: 1, title: '基础版', price: '2.99元', description: '1张兑换码', icon: '✨', value: 1 },
-    { id: 2, title: '标准版', price: '7.99元', description: '3张兑换码', icon: '⭐', value: 3 },
-    { id: 3, title: '高级版', price: '19.99元', description: '10张兑换码', icon: '🌟', value: 10 },
-    { id: 4, title: '批量版', price: '联系我们', description: '20张以上', icon: '📞', value: 20 },
+    { id: 1, price: '2.99元', description: '可生成1张图片', value: 1 },
+    { id: 2, price: '7.99元', description: '可生成3张图片', value: 3 },
+    { id: 3, price: '19.99元', description: '可生成10张图片', value: 10 },
+    { id: 4, price: '联系我们', description: '可生成20张以上', value: 20 },
   ]);
 
   // 从 localStorage 获取购买历史
@@ -33,7 +33,12 @@ export default function Home() {
   });
 
   // 生成历史记录状态
-  const [generatedHistory, setGeneratedHistory] = useState(() => {
+  const [generatedHistory, setGeneratedHistory] = useState([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+
     if (typeof window !== 'undefined') {
       const savedHistory = localStorage.getItem('generatedHistory');
       const history = savedHistory ? JSON.parse(savedHistory) : [];
@@ -41,10 +46,9 @@ export default function Home() {
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
       const filtered = history.filter(item => new Date(item.timestamp) > threeDaysAgo);
-      return filtered.slice(0, 6);
+      setGeneratedHistory(filtered.slice(0, 6));
     }
-    return [];
-  });
+  }, []);
 
   // 保存购买历史到 localStorage
   const saveHistoryToStorage = (newHistory) => {
@@ -56,17 +60,17 @@ export default function Home() {
 
   // 保存生成历史到 localStorage
   const saveGeneratedHistory = (newImage) => {
-    const newHistoryItem = {
-      id: Date.now(),
-      imageUrl: newImage,
-      timestamp: new Date().toISOString(),
-      date: new Date().toLocaleDateString('zh-CN')
-    };
-
-    const updatedHistory = [newHistoryItem, ...generatedHistory].slice(0, 6);
-    setGeneratedHistory(updatedHistory);
-
     if (typeof window !== 'undefined') {
+      const newHistoryItem = {
+        id: Date.now(),
+        imageUrl: newImage,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleDateString('zh-CN')
+      };
+
+      const updatedHistory = [newHistoryItem, ...generatedHistory].slice(0, 6);
+      setGeneratedHistory(updatedHistory);
+
       localStorage.setItem('generatedHistory', JSON.stringify(updatedHistory));
     }
   };
@@ -100,13 +104,13 @@ export default function Home() {
       }
 
       // 生成兑换码
-      const newCode = generateRedemptionCode(option.title);
+      const newCode = generateRedemptionCode(option.description);
 
       // 创建购买记录
       const purchaseRecord = {
         id: Date.now(),
         code: newCode,
-        type: option.title,
+        type: option.description, // 使用描述替代标题
         timestamp: new Date().toLocaleString('zh-CN'),
         price: option.price
       };
@@ -140,14 +144,20 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch some gallery items for preview
-    fetch('/api/gallery?limit=3')
-      .then(res => res.json())
-      .then(data => {
+    const fetchGalleryItems = async () => {
+      try {
+        const res = await fetch('/api/gallery?limit=3');
+        if (!res.ok) throw new Error('Failed to fetch gallery items');
+        const data = await res.json();
         if (data.images) {
           setGalleryItems(data.images);
         }
-      })
-      .catch(() => {});
+      } catch (error) {
+        console.error('Error fetching gallery items:', error);
+      }
+    };
+
+    fetchGalleryItems();
   }, []);
 
   const handleImageUpload = (e) => {
@@ -166,24 +176,6 @@ export default function Home() {
     }
   };
 
-  const handleVerifyCode = async () => {
-    if (!code) {
-      setError('请输入兑换码');
-      return;
-    }
-
-    try {
-      // Mock verification for demo purposes
-      if (code === 'MOCKCODE') {
-        setError('');
-        toast.success('兑换码验证成功！');
-      } else {
-        setError('兑换码无效');
-      }
-    } catch (err) {
-      setError('验证失败，请稍后重试');
-    }
-  };
 
   const handleGenerate = async () => {
     if (!image) {
@@ -200,12 +192,21 @@ export default function Home() {
     setError('');
 
     try {
-      // Mock image generation - always return the same mock image for demo purposes
-      setOriginalImage('/02.png');
-      setGeneratedImage('/02.png'); // Using the same image as mock
-      saveGeneratedHistory('/02.png'); // 保存到历史记录
-      setError('');
-      setCode('');
+      // 验證兌換碼並生成圖像
+      // Mock verification and generation for demo purposes
+      if (code && code.trim() !== '') {
+        // 模拟验证过程
+        setOriginalImage('/02.png');
+        setGeneratedImage('/02.png'); // 使用相同圖片作為模擬
+        if(isClient) {
+          saveGeneratedHistory('/02.png'); // 保存到歷史記錄
+        }
+        setError('');
+        // 清空生成後的兌換碼
+        setCode('');
+      } else {
+        setError('兑换码无效，请重新输入');
+      }
     } catch (err) {
       setError(err.message || '生成失败，请稍后重试');
     } finally {
@@ -452,9 +453,6 @@ export default function Home() {
                   placeholder="请输入兑换码"
                   className={styles.codeInput}
                 />
-                <button onClick={handleVerifyCode} className={styles.verifyButton}>
-                  验证
-                </button>
               </div>
 
               <button
@@ -489,10 +487,6 @@ export default function Home() {
                       <div className={styles.paymentOptions}>
                         {redemptionOptions.map((option) => (
                           <div key={option.id} className={styles.paymentOption}>
-                            <div className={styles.paymentOptionHeader}>
-                              <span className={styles.paymentOptionIcon}>{option.icon}</span>
-                              <h4>{option.title}</h4>
-                            </div>
                             <div className={styles.paymentOptionPrice}>{option.price}</div>
                             <p className={styles.paymentOptionDescription}>{option.description}</p>
                             <button
@@ -504,6 +498,10 @@ export default function Home() {
                             </button>
                           </div>
                         ))}
+                        <div className={styles.contactSection}>
+                          <p className={styles.contactQuestion}>遇到问题？</p>
+                          <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>联系我们</a>
+                        </div>
                       </div>
                     ) : (
                       <div className={styles.purchaseHistory}>
@@ -589,7 +587,7 @@ export default function Home() {
             <div className={styles.historySection}>
               <h3>最近生成记录</h3>
               <div className={styles.historyContainer}>
-                {generatedHistory.length > 0 ? (
+                {isClient && generatedHistory.length > 0 ? (
                   <div className={styles.historyList}>
                     {generatedHistory.map((item, index) => (
                       <div key={item.id} className={styles.historyItem}>
@@ -602,8 +600,10 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : isClient ? (
                   <p className={styles.noHistory}>暂无历史记录</p>
+                ) : (
+                  <p className={styles.noHistory}>&nbsp;</p> // 占位符以防止布局跳动
                 )}
               </div>
             </div>

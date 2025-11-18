@@ -72,7 +72,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
-  padding: 6rem 2rem;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -192,7 +192,7 @@
 
 /* Features Section */
 .features {
-  padding: 6rem 2rem;
+  padding: 2rem;
   background: hsl(var(--muted) / 0.3);
 }
 
@@ -256,7 +256,7 @@
 
 /* How It Works */
 .howItWorks {
-  padding: 6rem 2rem;
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -272,9 +272,17 @@
 
 .step {
   flex: 1;
-  min-width: 200px;
+  min-width: 150px; /* 减小最小宽度 */
+  max-width: 250px; /* 添加最大宽度限制 */
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem; /* 减少padding */
+  width: 100%; /* 在移动端设为100%宽度 */
+}
+
+@media (min-width: 769px) {
+  .step {
+    width: auto; /* 在大屏幕上恢复正常 */
+  }
 }
 
 .stepNumber {
@@ -312,7 +320,7 @@
 
 /* Gallery Preview */
 .galleryPreview {
-  padding: 6rem 2rem;
+  padding: 2rem;
   background: hsl(var(--muted) / 0.3);
 }
 
@@ -446,7 +454,7 @@
 
 /* CTA Section */
 .ctaSection {
-  padding: 6rem 2rem;
+  padding: 2rem;
   background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--chart-1)));
   color: hsl(var(--primary-foreground));
   text-align: center;
@@ -484,7 +492,7 @@
 
 /* Generate Section */
 .generateSection {
-  padding: 6rem 2rem;
+  padding: 2rem;
   background: hsl(var(--muted) / 0.3);
 }
 
@@ -830,8 +838,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: hsl(var(--foreground) / 0.5);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  backdrop-filter: blur(10px); /* 增加模糊效果 */
+  -webkit-backdrop-filter: blur(10px); /* Safari 兼容性 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -846,16 +855,19 @@
 }
 
 .paymentContent {
-  background: hsl(var(--card));
+  background: rgba(255, 255, 255, 0.15); /* 半透明背景 */
+  backdrop-filter: blur(12px); /* 毛玻璃效果 */
+  -webkit-backdrop-filter: blur(12px); /* Safari 兼容性 */
   border-radius: calc(var(--radius) * 3);
   padding: 1.25rem;
   width: 90%;
-  max-width: 580px;
-  max-height: 60vh;
+  max-width: 600px; /* 调整更窄的宽度 */
+  max-height: 80vh; /* 增加最大高度 */
   overflow-y: auto;
-  box-shadow: var(--shadow-2xl);
-  border: 1px solid hsl(var(--border));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* 现代化阴影 */
+  border: 1px solid rgba(255, 255, 255, 0.18); /* 半透明边框 */
   animation: slideUp 0.3s ease;
+  color: white; /* 白色文字以适应半透明背景 */
 }
 
 @keyframes slideUp {
@@ -877,52 +889,54 @@
 }
 
 .paymentOption {
-  background: hsl(var(--background));
-  border: 2px solid hsl(var(--border));
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: calc(var(--radius) * 2);
-  padding: 0.75rem 0.5rem;
+  padding: 1rem;
   text-align: center;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .paymentOption:hover {
+  background: rgba(255, 255, 255, 0.2);
   border-color: hsl(var(--primary));
   transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.paymentOptionHeader {
-  text-align: center;
-  margin-bottom: 0.25rem;
-}
-
-.paymentOptionIcon {
-  font-size: 1.75rem;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-.paymentOption h4 {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-  color: hsl(var(--foreground));
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .paymentOptionPrice {
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: hsl(var(--primary));
   margin: 0.25rem 0;
+  text-align: center;
 }
 
 .paymentOptionDescription {
-  color: hsl(var(--muted-foreground));
+  color: rgba(255, 255, 255, 0.7);
   margin: 0.25rem 0 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.paymentOptionPrice {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin: 0.25rem 0;
+  text-align: center;
+}
+
+.paymentOptionDescription {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .paymentOptionButton {
@@ -941,6 +955,32 @@
 .paymentOptionButton:hover {
   background: hsl(var(--primary) / 0.9);
   transform: translateY(-2px);
+}
+
+.contactSection {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 1rem;
+}
+
+.contactQuestion {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.contactLink {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.contactLink:hover {
+  color: hsl(var(--primary) / 0.8);
+  text-decoration: underline;
 }
 
 .paymentHeader {
@@ -1152,7 +1192,7 @@
 
 /* FAQ Section */
 .faqSection {
-  padding: 6rem 2rem;
+  padding: 2rem;
   background: hsl(var(--muted) / 0.3);
 }
 
@@ -1214,6 +1254,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
+
+  .paymentOption {
+    min-height: 120px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1251,6 +1295,32 @@
   .purchaseHistory th,
   .purchaseHistory td {
     padding: 0.25rem;
+  }
+
+  .contactSection {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .paymentOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentOption {
+    padding: 0.75rem;
+  }
+
+  .paymentOptionPrice {
+    font-size: 1rem;
+  }
+
+  .paymentOptionDescription {
+    font-size: 0.8rem;
+  }
+
+  .contactSection {
+    font-size: 0.8rem;
   }
 }
 
@@ -1470,13 +1540,18 @@
     grid-template-columns: 1fr;
   }
 
+  .galleryImage {
+    max-height: 200px;
+  }
+
+  /* 在移动端保持并排显示 */
   .galleryPair {
-    flex-direction: column;
+    flex-direction: row; /* 保持水平布局 */
     gap: 1rem;
   }
 
-  .galleryImage {
-    max-height: 200px;
+  .galleryImageContainer {
+    flex: 1; /* 平均分配空间 */
   }
 
   /* Features Grid Mobile */

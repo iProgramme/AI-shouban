@@ -111,20 +111,14 @@
   line-height: 1.6;
 }
 
-.contactSection {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 5rem;
-}
-
 .contactMethods {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 2rem;
 }
 
 .contactCard {
+  flex: 1;
   background: hsl(var(--card));
   border-radius: calc(var(--radius) * 3);
   padding: 2.5rem 2rem;
@@ -372,11 +366,13 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
   }
 
   .subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-bottom: 2rem;
   }
 
   .contactSection {
@@ -386,8 +382,30 @@
   }
 
   .contactMethods {
+    display: flex;
     flex-direction: column;
     gap: 1.5rem;
+  }
+
+  .contactCard {
+    padding: 1.8rem; /* 减少 padding */
+    text-align: center; /* 移动端居中对齐 */
+    width: 100%; /* 确保占满全宽 */
+    max-width: none; /* 移除最大宽度限制 */
+  }
+
+  .contactCard h3 {
+    font-size: 1.3rem; /* 适当調整標題大小 */
+    margin: 0.75rem 0 0.5rem; /* 調整間距 */
+  }
+
+  .contactValue {
+    font-size: 1.1rem;
+    word-break: break-word; /* 长单词换行 */
+  }
+
+  .contactIcon {
+    font-size: 2.5rem; /* 调整图标大小 */
   }
 
   .nav {
@@ -416,26 +434,52 @@
 
 @media (max-width: 480px) {
   .main {
-    padding: 2rem 0.75rem;
+    padding: 1.5rem 0.5rem; /* 减少內邊距 */
   }
 
   .title {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .contactSection {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .contactCard {
-    padding: 1.5rem;
+    padding: 1.2rem;
+    margin: 0 0.25rem; /* 添加側邊邊距 */
   }
 
   .contactCard h3 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0.25rem;
   }
 
   .contactValue {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    margin: 0.25rem 0 0.5rem;
+  }
+
+  .contactDesc {
+    font-size: 0.8rem;
   }
 
   .contactIcon {
     font-size: 2rem;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
+
+  .contactMethods {
+    gap: 1rem;
   }
 }
