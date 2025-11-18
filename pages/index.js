@@ -5,6 +5,21 @@ import styles from '../styles/Home.module.css';
 
 export default function Home() {
   const [galleryItems, setGalleryItems] = useState([]);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [code, setCode] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [originalImage, setOriginalImage] = useState(null);
+  const [error, setError] = useState('');
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [redemptionOptions, setRedemptionOptions] = useState([
+    { id: 1, title: '基础版', price: '2.99元', description: '1张兑换码', icon: '✨', value: 1 },
+    { id: 2, title: '标准版', price: '7.99元', description: '3张兑换码', icon: '⭐', value: 3 },
+    { id: 3, title: '高级版', price: '19.99元', description: '10张兑换码', icon: '🌟', value: 10 },
+    { id: 4, title: '批量版', price: '联系我们', description: '20张以上', icon: '📞', value: 20 },
+  ]);
 
   useEffect(() => {
     // Fetch some gallery items for preview
@@ -17,6 +32,90 @@ export default function Home() {
       })
       .catch(() => {});
   }, []);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('文件大小不能超过5MB');
+        return;
+      }
+
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+      setError('');
+      setGeneratedImage(null);
+      setOriginalImage(null);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!code) {
+      setError('请输入兑换码');
+      return;
+    }
+
+    try {
+      // Mock verification for demo purposes
+      if (code === 'MOCKCODE') {
+        setError('');
+        alert('兑换码验证成功！');
+      } else {
+        setError('兑换码无效');
+      }
+    } catch (err) {
+      setError('验证失败，请稍后重试');
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!image) {
+      setError('请先上传图片');
+      return;
+    }
+
+    if (!code) {
+      setError('请输入兑换码');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      // Mock image generation - always return the same mock image for demo purposes
+      setOriginalImage('/02.png');
+      setGeneratedImage('/02.png'); // Using the same image as mock
+      setError('');
+      setCode('');
+    } catch (err) {
+      setError(err.message || '生成失败，请稍后重试');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePayment = async (option) => {
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      if (option.id === 4) {
+        // 如果选择批量版，直接跳转到联系页面
+        window.location.href = '/contact';
+        setShowPayment(false);
+        return;
+      }
+
+      // Mock payment processing
+      alert(`已创建支付订单：购买${option.title}，总计 ${option.price}`);
+      setShowPayment(false);
+    } catch (err) {
+      setError(err.message || '支付失败，请稍后重试');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -33,7 +132,6 @@ export default function Home() {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLinkActive}>首页</Link>
-          <Link href="/generate" className={styles.navLink}>生成图片</Link>
           <Link href="/gallery" className={styles.navLink}>作品展示</Link>
           <Link href="/contact" className={styles.navLink}>联系我们</Link>
         </div>
@@ -53,7 +151,7 @@ export default function Home() {
             简单、快速、效果惊艳
           </p>
           <div className={styles.heroButtons}>
-            <Link href="/generate" className={styles.ctaPrimary}>
+            <Link href="/" className={styles.ctaPrimary}>
               立即开始生成
             </Link>
             <Link href="/gallery" className={styles.ctaSecondary}>
@@ -127,49 +225,265 @@ export default function Home() {
       </section>
 
       {/* Gallery Preview */}
-      {galleryItems.length > 0 && (
-        <section className={styles.galleryPreview}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>作品展示</h2>
-            <p className={styles.sectionDescription}>看看其他用户生成的作品</p>
+      <section className={styles.galleryPreview}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>作品展示</h2>
+          <p className={styles.sectionDescription}>看看其他用户生成的作品</p>
+        </div>
+        <div className={styles.galleryGrid}>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/input1.png"
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>原图</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/output1.png"
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>效果图</p>
+              </div>
+            </div>
           </div>
-          <div className={styles.galleryGrid}>
-            {galleryItems.map((item, index) => (
-              <div key={item.id || index} className={styles.galleryItem}>
-                <div className={styles.galleryImageWrapper}>
-                  <img 
-                    src={item.original_image_url} 
-                    alt="Original" 
-                    className={styles.galleryImage}
-                  />
-                  <div className={styles.galleryOverlay}>
-                    <img 
-                      src={item.generated_image_url} 
-                      alt="Generated" 
-                      className={styles.galleryImage}
-                    />
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/input1.png"
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>原图</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/output1.png"
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>效果图</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/input1.png"
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>原图</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src="/images/output1.png"
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    alert('您可以右键点击图片或长按图片来下载');
+                  }}
+                />
+                <p className={styles.galleryImageLabel}>效果图</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={styles.galleryCTA}>
+          <Link href="/gallery" className={styles.ctaSecondary}>
+            查看更多作品
+          </Link>
+        </div>
+      </section>
+
+      {/* Generate Section */}
+      <section className={styles.generateSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>开始生成您的手办</h2>
+          <p className={styles.sectionDescription}>上传图片并输入兑换码，即可生成专属手办</p>
+        </div>
+
+        <div className={styles.generateContainer}>
+          <div className={styles.leftSection}>
+            <div className={styles.uploadSection}>
+              <h3>上传图片</h3>
+              <div className={styles.uploadArea}>
+                {preview ? (
+                  <img src={preview} alt="Preview" className={styles.previewImage} />
+                ) : (
+                  <div className={styles.placeholder}>
+                    <p>点击下方按钮上传图片</p>
+                    <p className={styles.hint}>支持 JPG、PNG 格式，最大 5MB</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id="homeImageUpload"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className={styles.fileInput}
+                />
+                <label htmlFor="homeImageUpload" className={styles.uploadButton}>
+                  选择图片
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.codeSection}>
+              <h3>兑换码</h3>
+              <div className={styles.codeInputContainer}>
+                <input
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="请输入兑换码"
+                  className={styles.codeInput}
+                />
+                <button onClick={handleVerifyCode} className={styles.verifyButton}>
+                  验证
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowPayment(!showPayment)}
+                className={styles.buyButton}
+              >
+                购买兑换码
+              </button>
+
+              {showPayment && (
+                <div className={styles.paymentModal} onClick={() => setShowPayment(false)}>
+                  <div className={styles.paymentContent} onClick={(e) => e.stopPropagation()}>
+                    <h3>购买兑换码</h3>
+                    <div className={styles.paymentOptions}>
+                      {redemptionOptions.map((option) => (
+                        <div key={option.id} className={styles.paymentOption}>
+                          <div className={styles.paymentOptionHeader}>
+                            <span className={styles.paymentOptionIcon}>{option.icon}</span>
+                            <h4>{option.title}</h4>
+                          </div>
+                          <div className={styles.paymentOptionPrice}>{option.price}</div>
+                          <p className={styles.paymentOptionDescription}>{option.description}</p>
+                          <button
+                            className={styles.paymentOptionButton}
+                            onClick={() => handlePayment(option)}
+                            disabled={paymentLoading}
+                          >
+                            {option.id === 4 ? '联系我们' : '立即购买'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <p className={styles.galleryLabel}>原图 → 手办效果</p>
-              </div>
-            ))}
-          </div>
-          <div className={styles.galleryCTA}>
-            <Link href="/gallery" className={styles.ctaSecondary}>
-              查看更多作品
-            </Link>
-          </div>
-        </section>
-      )}
+              )}
 
-      {/* CTA Section */}
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaContent}>
-          <h2>准备好开始了吗？</h2>
-          <p>立即上传您的照片，体验AI手办生成的魅力</p>
-          <Link href="/generate" className={styles.ctaPrimaryLarge}>
-            开始生成手办
-          </Link>
+              <button
+                onClick={handleGenerate}
+                disabled={isProcessing || !image || !code}
+                className={`${styles.generateButton} ${(!image || !code) ? styles.disabled : ''}`}
+              >
+                {isProcessing ? '生成中...' : '生成手办'}
+              </button>
+
+              {error && <div className={styles.error}>{error}</div>}
+            </div>
+          </div>
+
+          <div className={styles.rightSection}>
+            {(generatedImage || originalImage) && (
+              <div className={styles.resultSection}>
+                <h3>生成结果</h3>
+                <div className={styles.resultImages}>
+                  {originalImage && (
+                    <div className={styles.imageContainer}>
+                      <h4>原图</h4>
+                      <img
+                        src={originalImage}
+                        alt="Original"
+                        className={styles.resultImage}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          alert('您可以右键点击图片或长按图片来下载');
+                        }}
+                      />
+                    </div>
+                  )}
+                  {generatedImage && (
+                    <div className={styles.imageContainer}>
+                      <h4>手办效果</h4>
+                      <img
+                        src={generatedImage}
+                        alt="Generated"
+                        className={styles.resultImage}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          alert('您可以右键点击图片或长按图片来下载');
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className={styles.faqSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>常见问题</h2>
+          <p className={styles.sectionDescription}>快速找到您问题的答案</p>
+        </div>
+
+        <div className={styles.faqGrid}>
+          <div className={styles.faqItem}>
+            <h3 className={styles.question}>如何购买兑换码？</h3>
+            <p className={styles.answer}>您可以在首页点击购买兑换码，选择合适的套餐进行购买。我们提供多种套餐以满足不同需求。</p>
+          </div>
+
+          <div className={styles.faqItem}>
+            <h3 className={styles.question}>生成时间需要多久？</h3>
+            <p className={styles.answer}>通常在提交图片后，AI会在数秒内完成手办生成。处理时间也取决于当前服务器负载情况。</p>
+          </div>
+
+          <div className={styles.faqItem}>
+            <h3 className={styles.question}>支持哪些图片格式？</h3>
+            <p className={styles.answer}>目前支持JPG、PNG格式的图片，大小不超过5MB。建议使用正面清晰的人像图片以获得最佳效果。</p>
+          </div>
+
+          <div className={styles.faqItem}>
+            <h3 className={styles.question}>批量购买有什么优惠？</h3>
+            <p className={styles.answer}>20张以上可联系我们获取批量优惠价格。我们为商业用户和大量需求用户提供定制化方案。</p>
+          </div>
         </div>
       </section>
 
@@ -188,7 +502,6 @@ export default function Home() {
           <div className={styles.footerSection}>
             <h4>快速链接</h4>
             <Link href="/">首页</Link>
-            <Link href="/generate">生成图片</Link>
             <Link href="/gallery">作品展示</Link>
             <Link href="/contact">联系我们</Link>
           </div>

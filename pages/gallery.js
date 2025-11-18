@@ -43,7 +43,6 @@ export default function Gallery() {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLink}>首页</Link>
-          <Link href="/generate" className={styles.navLink}>生成图片</Link>
           <Link href="/gallery" className={styles.navLinkActive}>作品展示</Link>
           <Link href="/contact" className={styles.navLink}>联系我们</Link>
         </div>
@@ -60,22 +59,30 @@ export default function Gallery() {
           {!loading && !error && galleryItems.length > 0 ? (
             galleryItems.map((item, index) => (
               <div key={item.id || index} className={styles.galleryItem}>
-                <div className={styles.imageComparison}>
-                  <div className={styles.originalContainer}>
-                    <h4>原图</h4>
-                    <img 
-                      src={item.original_image_url} 
-                      alt="Original" 
-                      className={styles.originalImage} 
+                <div className={styles.galleryPair}>
+                  <div className={styles.galleryImageContainer}>
+                    <img
+                      src={item.original_image_url}
+                      alt="Original"
+                      className={styles.galleryImage}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        alert('您可以右键点击图片或长按图片来下载');
+                      }}
                     />
+                    <p className={styles.galleryImageLabel}>原图</p>
                   </div>
-                  <div className={styles.generatedContainer}>
-                    <h4>手办效果</h4>
-                    <img 
-                      src={item.generated_image_url} 
-                      alt="Generated" 
-                      className={styles.generatedImage} 
+                  <div className={styles.galleryImageContainer}>
+                    <img
+                      src={item.generated_image_url}
+                      alt="Generated"
+                      className={styles.galleryImage}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        alert('您可以右键点击图片或长按图片来下载');
+                      }}
                     />
+                    <p className={styles.galleryImageLabel}>效果图</p>
                   </div>
                 </div>
               </div>
@@ -100,7 +107,6 @@ export default function Gallery() {
           <div className={styles.footerSection}>
             <h4>快速链接</h4>
             <Link href="/">首页</Link>
-            <Link href="/generate">生成图片</Link>
             <Link href="/gallery">作品展示</Link>
             <Link href="/contact">联系我们</Link>
           </div>

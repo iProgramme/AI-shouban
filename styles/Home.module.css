@@ -304,7 +304,7 @@
 
 .galleryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto 3rem;
@@ -324,6 +324,17 @@
   box-shadow: var(--shadow-xl);
 }
 
+.galleryPair {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.galleryImageContainer {
+  flex: 1;
+  text-align: center;
+}
+
 .galleryImageWrapper {
   position: relative;
   width: 100%;
@@ -335,7 +346,37 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease;
+  border-radius: calc(var(--radius) * 2);
+  transition: transform 0.3s ease;
+  max-height: 300px;
+}
+
+.galleryImage:hover {
+  transform: scale(1.05);
+}
+
+.galleryLabel {
+  padding: 1rem;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.galleryImageLabel {
+  margin-top: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 保留旧的样式类以兼容其他可能的引用 */
+.galleryImageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .galleryOverlay {
@@ -404,6 +445,569 @@
 .ctaPrimaryLarge:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-2xl);
+}
+
+/* Generate Section */
+.generateSection {
+  padding: 6rem 2rem;
+  background: hsl(var(--muted) / 0.3);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.generateContainer {
+  background: hsl(var(--card));
+  border-radius: calc(var(--radius) * 3);
+  padding: 3rem;
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid hsl(var(--border) / 0.5);
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.leftSection {
+  flex: 1;
+}
+
+.rightSection {
+  flex: 1;
+}
+
+.uploadSection {
+  margin-bottom: 2rem;
+}
+
+.codeSection {
+  margin-bottom: 2rem;
+}
+
+.uploadSection h3,
+.codeSection h3,
+.resultSection h3 {
+  margin-bottom: 1.5rem;
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.uploadSection h3::before {
+  content: '📸';
+  margin-right: 0.5rem;
+}
+
+.codeSection h3::before {
+  content: '🎫';
+  margin-right: 0.5rem;
+}
+
+.resultSection h3::before {
+  content: '🎨';
+  margin-right: 0.5rem;
+}
+
+.uploadArea {
+  border: 2px dashed hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  padding: 2rem;
+  text-align: center;
+  background: hsl(var(--muted) / 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.uploadArea:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--muted) / 0.5);
+}
+
+.placeholder {
+  margin-bottom: 1.5rem;
+}
+
+.placeholder p {
+  color: hsl(var(--muted-foreground));
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground) / 0.8);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  display: inline-block;
+  padding: 0.875rem 2.5rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: calc(var(--radius) * 2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
+  border: none;
+}
+
+.uploadButton:hover {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.codeInputContainer {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.codeInput {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  transition: all 0.3s ease;
+}
+
+.codeInput:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.verifyButton {
+  padding: 0.875rem 2rem;
+  background: hsl(var(--chart-4));
+  color: hsl(var(--accent-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.verifyButton:hover {
+  background: hsl(var(--chart-4) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.buyButton {
+  width: 100%;
+  padding: 1rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.buyButton:hover {
+  background: hsl(var(--accent) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.generateButton {
+  width: 100%;
+  padding: 1.25rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1.125rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.generateButton:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-xl);
+}
+
+.resultSection {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.resultImages {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.imageContainer {
+  text-align: center;
+  flex: 1;
+}
+
+.imageContainer h4 {
+  margin-bottom: 1rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.resultImage {
+  width: 100%;
+  max-width: 100%;
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid hsl(var(--border));
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.resultImage:hover {
+  transform: scale(1.02);
+}
+
+.error {
+  color: hsl(var(--destructive));
+  margin-top: 1rem;
+  padding: 1rem;
+  background: hsl(var(--destructive) / 0.1);
+  border-radius: calc(var(--radius) * 2);
+  text-align: center;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  font-weight: 500;
+}
+
+.paymentModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: hsl(var(--foreground) / 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.paymentContent {
+  background: hsl(var(--card));
+  border-radius: calc(var(--radius) * 3);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 650px;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid hsl(var(--border));
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.paymentOptions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.paymentOption {
+  background: hsl(var(--background));
+  border: 2px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.paymentOption:hover {
+  border-color: hsl(var(--primary));
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.paymentOptionHeader {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.paymentOptionIcon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.paymentOption h4 {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: hsl(var(--foreground));
+}
+
+.paymentOptionPrice {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin: 0.5rem 0;
+}
+
+.paymentOptionDescription {
+  color: hsl(var(--muted-foreground));
+  margin: 0.5rem 0 1rem;
+  font-size: 0.85rem;
+}
+
+.paymentOptionButton {
+  width: 100%;
+  padding: 0.875rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.paymentOptionButton:hover {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-2px);
+}
+
+.quantitySelector {
+  margin-bottom: 1.5rem;
+}
+
+.quantitySelector label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.quantitySelector select {
+  width: 100%;
+  padding: 0.875rem;
+  border: 2px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quantitySelector select:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.totalAmount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding: 1rem;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: calc(var(--radius) * 2);
+}
+
+.payButton {
+  width: 100%;
+  padding: 1rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.payButton:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.payButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelButton {
+  width: 100%;
+  padding: 0.875rem;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancelButton:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: calc(var(--radius) * 2);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid hsl(var(--border));
+  object-fit: contain;
+}
+
+/* FAQ Section */
+.faqSection {
+  padding: 6rem 2rem;
+  background: hsl(var(--muted) / 0.3);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.faqGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.faqItem {
+  background: hsl(var(--card));
+  padding: 2rem;
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: var(--shadow-md);
+  border: 1px solid hsl(var(--border));
+  transition: all 0.3s ease;
+}
+
+.faqItem:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+}
+
+.question {
+  color: hsl(var(--foreground));
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.question::before {
+  content: '?';
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 50%;
+  text-align: center;
+  line-height: 30px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.answer {
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* Mobile Responsive for Payment Options */
+@media (max-width: 992px) {
+  .paymentOptions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .paymentOptions {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .paymentContent {
+    padding: 1.5rem;
+  }
+
+  .paymentOption {
+    padding: 1rem;
+  }
+
+  .faqGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .faqSection {
+    padding: 4rem 1rem;
+  }
+
+  .faqItem {
+    padding: 1.5rem;
+  }
 }
 
 /* Footer */
