@@ -370,25 +370,6 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 1024px) {
-  .contactSection {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .contactMethods {
-    order: 2;
-  }
-
-  .contactForm {
-    order: 1;
-  }
-
-  .faqGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 768px) {
   .title {
     font-size: 2rem;
@@ -399,20 +380,14 @@
   }
 
   .contactSection {
+    flex-direction: column;
     gap: 2rem;
     margin-bottom: 3rem;
   }
 
-  .contactForm {
-    padding: 2rem 1.5rem;
-  }
-
-  .faqSection {
-    padding: 2rem 1.5rem;
-  }
-
-  .faqSection h2 {
-    font-size: 1.5rem;
+  .contactMethods {
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
   .nav {
@@ -449,7 +424,7 @@
   }
 
   .contactCard {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
   }
 
   .contactCard h3 {
@@ -460,7 +435,7 @@
     font-size: 1.1rem;
   }
 
-  .faqItem {
-    padding: 1.25rem;
+  .contactIcon {
+    font-size: 2rem;
   }
 }

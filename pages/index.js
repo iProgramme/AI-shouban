@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from '../styles/Home.module.css';
 
 export default function Home() {
@@ -31,11 +32,42 @@ export default function Home() {
     return [];
   });
 
+  // 生成历史记录状态
+  const [generatedHistory, setGeneratedHistory] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedHistory = localStorage.getItem('generatedHistory');
+      const history = savedHistory ? JSON.parse(savedHistory) : [];
+      // 只保留最近3天的6条记录
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const filtered = history.filter(item => new Date(item.timestamp) > threeDaysAgo);
+      return filtered.slice(0, 6);
+    }
+    return [];
+  });
+
   // 保存购买历史到 localStorage
   const saveHistoryToStorage = (newHistory) => {
     setPurchaseHistory(newHistory);
     if (typeof window !== 'undefined') {
       localStorage.setItem('purchaseHistory', JSON.stringify(newHistory));
+    }
+  };
+
+  // 保存生成历史到 localStorage
+  const saveGeneratedHistory = (newImage) => {
+    const newHistoryItem = {
+      id: Date.now(),
+      imageUrl: newImage,
+      timestamp: new Date().toISOString(),
+      date: new Date().toLocaleDateString('zh-CN')
+    };
+
+    const updatedHistory = [newHistoryItem, ...generatedHistory].slice(0, 6);
+    setGeneratedHistory(updatedHistory);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('generatedHistory', JSON.stringify(updatedHistory));
     }
   };
 
@@ -88,7 +120,7 @@ export default function Home() {
       setCode(newCode);
 
       // 显示成功提示
-      alert(`购买成功！兑换码已自动填入：${newCode}`);
+      toast.success(`购买成功！兑换码已自动填入：${newCode}`);
     } catch (err) {
       setError(err.message || '购买失败，请稍后重试');
     } finally {
@@ -99,10 +131,10 @@ export default function Home() {
   // 复制兑换码到剪贴板
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      alert('兑换码已复制到剪贴板！');
+      toast.success('兑换码已复制到剪贴板！');
     }).catch(err => {
       console.error('复制失败', err);
-      alert('复制失败，请手动复制');
+      toast.error('复制失败，请手动复制');
     });
   };
 
@@ -144,7 +176,7 @@ export default function Home() {
       // Mock verification for demo purposes
       if (code === 'MOCKCODE') {
         setError('');
-        alert('兑换码验证成功！');
+        toast.success('兑换码验证成功！');
       } else {
         setError('兑换码无效');
       }
@@ -171,6 +203,7 @@ export default function Home() {
       // Mock image generation - always return the same mock image for demo purposes
       setOriginalImage('/02.png');
       setGeneratedImage('/02.png'); // Using the same image as mock
+      saveGeneratedHistory('/02.png'); // 保存到历史记录
       setError('');
       setCode('');
     } catch (err) {
@@ -223,10 +256,11 @@ export default function Home() {
           </div>
         </div>
         <div className={styles.heroImage}>
-          <div className={styles.heroImagePlaceholder}>
-            <div className={styles.heroImageIcon}>🎭</div>
-            <p>AI手办生成效果预览</p>
-          </div>
+          <img
+            src="/images/hero.png"
+            alt="AI手办生成效果预览"
+            className={styles.heroPreviewImage}
+          />
         </div>
       </section>
 
@@ -301,10 +335,6 @@ export default function Home() {
                   src="/images/input1.png"
                   alt="Original"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>原图</p>
               </div>
@@ -313,10 +343,6 @@ export default function Home() {
                   src="/images/output1.png"
                   alt="Generated"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>效果图</p>
               </div>
@@ -329,10 +355,6 @@ export default function Home() {
                   src="/images/input1.png"
                   alt="Original"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>原图</p>
               </div>
@@ -341,10 +363,6 @@ export default function Home() {
                   src="/images/output1.png"
                   alt="Generated"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>效果图</p>
               </div>
@@ -357,10 +375,6 @@ export default function Home() {
                   src="/images/input1.png"
                   alt="Original"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>原图</p>
               </div>
@@ -369,10 +383,6 @@ export default function Home() {
                   src="/images/output1.png"
                   alt="Generated"
                   className={styles.galleryImage}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    alert('您可以右键点击图片或长按图片来下载');
-                  }}
                 />
                 <p className={styles.galleryImageLabel}>效果图</p>
               </div>
@@ -397,23 +407,38 @@ export default function Home() {
               <h3>上传图片</h3>
               <div className={styles.uploadArea}>
                 {preview ? (
-                  <img src={preview} alt="Preview" className={styles.previewImage} />
+                  <>
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className={styles.previewImage}
+                      onClick={() => {
+                        // 重置图片选择
+                        const fileInput = document.getElementById('homeImageUpload');
+                        if (fileInput) fileInput.value = '';
+                        setPreview(null);
+                        setImage(null);
+                      }}
+                    />
+                  </>
                 ) : (
-                  <div className={styles.placeholder}>
-                    <p>点击下方按钮上传图片</p>
-                    <p className={styles.hint}>支持 JPG、PNG 格式，最大 5MB</p>
-                  </div>
+                  <>
+                    <div className={styles.placeholder}>
+                      <p>点击下方按钮上传图片</p>
+                      <p className={styles.hint}>支持 JPG、PNG 格式，最大 5MB</p>
+                    </div>
+                    <input
+                      type="file"
+                      id="homeImageUpload"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className={styles.fileInput}
+                    />
+                    <label htmlFor="homeImageUpload" className={styles.uploadButton}>
+                      选择图片
+                    </label>
+                  </>
                 )}
-                <input
-                  type="file"
-                  id="homeImageUpload"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className={styles.fileInput}
-                />
-                <label htmlFor="homeImageUpload" className={styles.uploadButton}>
-                  选择图片
-                </label>
               </div>
             </div>
 
@@ -544,41 +569,44 @@ export default function Home() {
           </div>
 
           <div className={styles.rightSection}>
-            {(generatedImage || originalImage) && (
+            {generatedImage && (
               <div className={styles.resultSection}>
                 <h3>生成结果</h3>
                 <div className={styles.resultImages}>
-                  {originalImage && (
-                    <div className={styles.imageContainer}>
-                      <h4>原图</h4>
-                      <img
-                        src={originalImage}
-                        alt="Original"
-                        className={styles.resultImage}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          alert('您可以右键点击图片或长按图片来下载');
-                        }}
-                      />
-                    </div>
-                  )}
-                  {generatedImage && (
-                    <div className={styles.imageContainer}>
-                      <h4>手办效果</h4>
-                      <img
-                        src={generatedImage}
-                        alt="Generated"
-                        className={styles.resultImage}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          alert('您可以右键点击图片或长按图片来下载');
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div className={styles.imageContainer}>
+                    <img
+                      src={generatedImage}
+                      alt="Generated Hand Figurine"
+                      className={styles.resultImage}
+                    />
+                    <p className={styles.downloadHint}>右键点击或长按图片可下载</p>
+                  </div>
                 </div>
               </div>
             )}
+
+            {/* 历史记录部分 */}
+            <div className={styles.historySection}>
+              <h3>最近生成记录</h3>
+              <div className={styles.historyContainer}>
+                {generatedHistory.length > 0 ? (
+                  <div className={styles.historyList}>
+                    {generatedHistory.map((item, index) => (
+                      <div key={item.id} className={styles.historyItem}>
+                        <img
+                          src={item.imageUrl}
+                          alt="Generated History"
+                          className={styles.historyImage}
+                        />
+                        <p className={styles.historyDate}>{item.date}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.noHistory}>暂无历史记录</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>

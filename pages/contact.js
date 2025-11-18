@@ -46,68 +46,6 @@ export default function Contact() {
               </p>
               <p className={styles.contactDesc}>24小时回复</p>
             </div>
-
-            <div className={styles.contactCard}>
-              <div className={styles.contactIcon}>❓</div>
-              <h3>常见问题</h3>
-              <p className={styles.contactDesc}>查看我们的FAQ页面</p>
-              <Link href="/faq" className={styles.faqLink}>访问FAQ</Link>
-            </div>
-          </div>
-
-          <div className={styles.contactForm}>
-            <h3>发送消息</h3>
-            <form className={styles.form}>
-              <div className={styles.formGroup}>
-                <label htmlFor="name">姓名</label>
-                <input type="text" id="name" placeholder="请输入您的姓名" />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="email">邮箱</label>
-                <input type="email" id="email" placeholder="请输入您的邮箱" />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="subject">主题</label>
-                <select id="subject">
-                  <option value="">请选择主题</option>
-                  <option value="technical">技术服务</option>
-                  <option value="billing">账单问题</option>
-                  <option value="general">一般咨询</option>
-                  <option value="complaint">投诉建议</option>
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="message">消息</label>
-                <textarea
-                  id="message"
-                  rows="5"
-                  placeholder="请详细描述您的问题或建议"
-                ></textarea>
-              </div>
-              <button type="submit" className={styles.submitButton}>发送消息</button>
-            </form>
-          </div>
-        </section>
-
-        <section className={styles.faqSection}>
-          <h2>常见问题</h2>
-          <div className={styles.faqGrid}>
-            <div className={styles.faqItem}>
-              <h4>如何购买兑换码？</h4>
-              <p>您可以在首页点击购买兑换码，选择合适的套餐进行购买。</p>
-            </div>
-            <div className={styles.faqItem}>
-              <h4>生成时间需要多久？</h4>
-              <p>通常在提交图片后，AI会在数秒内完成手办生成。</p>
-            </div>
-            <div className={styles.faqItem}>
-              <h4>支持哪些图片格式？</h4>
-              <p>目前支持JPG、PNG格式的图片，大小不超过5MB。</p>
-            </div>
-            <div className={styles.faqItem}>
-              <h4>批量购买有什么优惠？</h4>
-              <p>20张以上可联系我们获取批量优惠价格。</p>
-            </div>
           </div>
         </section>
       </main>

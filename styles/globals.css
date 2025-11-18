@@ -53,6 +53,16 @@
   --spacing: 0.25rem;
 }
 
+/* 全局样式 */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
+
 .dark {
   --background: 60 2.7027% 14.5098%;
   --foreground: 46.1538 9.7744% 73.9216%;
