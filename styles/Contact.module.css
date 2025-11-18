@@ -1,0 +1,349 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--chart-1)) 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, hsl(var(--accent) / 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, hsl(var(--secondary) / 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoIcon {
+  font-size: 2rem;
+}
+
+.navLinks {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navLink,
+.navLinkActive {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius) * 2);
+  transition: all 0.3s ease;
+}
+
+.navLinkActive {
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+}
+
+.navLink:hover {
+  color: hsl(var(--primary));
+  background: hsl(var(--muted));
+}
+
+.main {
+  flex: 1;
+  padding: 3rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  color: hsl(var(--card));
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 3rem;
+  font-weight: 700;
+  text-shadow: 0 4px 20px hsl(var(--foreground) / 0.2);
+  letter-spacing: -0.02em;
+}
+
+.title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: hsl(var(--accent));
+  margin: 1.5rem auto;
+  border-radius: 2px;
+}
+
+.contactInfo {
+  background: hsl(var(--card));
+  border-radius: calc(var(--radius) * 3);
+  padding: 4rem 3rem;
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.contactMethod {
+  text-align: center;
+  margin-bottom: 4rem;
+  padding-bottom: 3rem;
+  border-bottom: 2px solid hsl(var(--border));
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.contactMethod:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.contactMethod::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 50%;
+  z-index: 0;
+  transition: all 0.3s ease;
+}
+
+.contactMethod:hover::before {
+  width: 120px;
+  height: 120px;
+  background: hsl(var(--primary) / 0.1);
+}
+
+.contactMethod h2 {
+  color: hsl(var(--foreground));
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.contactMethod:first-child h2::before {
+  content: '💬';
+  font-size: 1.5rem;
+}
+
+.contactMethod:last-child h2::before {
+  content: '📧';
+  font-size: 1.5rem;
+}
+
+.contactValue {
+  color: hsl(var(--muted-foreground));
+  font-size: 1.5rem;
+  word-break: break-all;
+  position: relative;
+  z-index: 1;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.contactMethod:hover .contactValue {
+  color: hsl(var(--primary));
+}
+
+.emailLink {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  position: relative;
+}
+
+.emailLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: hsl(var(--primary));
+  transition: width 0.3s ease;
+}
+
+.emailLink:hover {
+  color: hsl(var(--chart-1));
+}
+
+.emailLink:hover::after {
+  width: 100%;
+}
+
+.footer {
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  padding: 4rem 2rem 2rem;
+  margin-top: auto;
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+.footerSection h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+}
+
+.footerSection a {
+  display: block;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+  transition: color 0.2s ease;
+}
+
+.footerSection a:hover {
+  color: hsl(var(--primary));
+}
+
+.footerSection p {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.footerLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin-bottom: 1rem;
+}
+
+.footerDescription {
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+}
+
+.footerBottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .contactInfo {
+    padding: 3rem 2rem;
+  }
+
+  .contactMethod {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+  }
+
+  .contactMethod h2 {
+    font-size: 1.5rem;
+  }
+
+  .contactValue {
+    font-size: 1.25rem;
+  }
+
+  .nav {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .navLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .navLink,
+  .navLinkActive {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 2rem 0.75rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .contactInfo {
+    padding: 2rem 1.5rem;
+  }
+
+  .contactMethod h2 {
+    font-size: 1.25rem;
+  }
+
+  .contactValue {
+    font-size: 1.125rem;
+  }
+}
