@@ -1,0 +1,335 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.header {
+  padding: 1.25rem 2rem;
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.header h1 {
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.logoutButton {
+  padding: 0.625rem 1.25rem;
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background: hsl(var(--destructive) / 0.9);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: hsl(var(--muted));
+  padding: 0.5rem;
+  border-radius: calc(var(--radius) * 3);
+}
+
+.tabButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex: 1;
+  text-align: center;
+}
+
+.tabButton:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.tabButton.activeTab {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--shadow-sm);
+}
+
+.generationSection, .filterSection {
+  background: hsl(var(--card));
+  padding: 1.5rem;
+  border-radius: calc(var(--radius) * 3);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid hsl(var(--border));
+}
+
+.generationSection h2, .filterSection h2 {
+  color: hsl(var(--foreground));
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.generationForm, .filterForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  color: hsl(var(--foreground));
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.input {
+  padding: 0.75rem;
+  border: 2px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.select {
+  padding: 0.75rem;
+  border: 2px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.select:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.generateButton {
+  padding: 0.875rem 1.5rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  align-self: end; /* 使按钮在网格中对齐底部 */
+}
+
+.generateButton:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refreshButton {
+  padding: 0.875rem 1.5rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: end;
+  white-space: nowrap;
+}
+
+.refreshButton:hover {
+  background: hsl(var(--accent) / 0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.success {
+  color: hsl(var(--success, 142, 76%, 36%)); /* 自定义成功颜色 */
+  background: hsl(var(--success, 142, 76%, 90%)); /* 自定义成功背景色 */
+  padding: 0.75rem;
+  border-radius: calc(var(--radius) * 2);
+  margin-top: 1rem;
+  border: 1px solid hsl(var(--success, 142, 76%, 70%));
+}
+
+.error {
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.1);
+  padding: 0.75rem;
+  border-radius: calc(var(--radius) * 2);
+  margin-top: 1rem;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+}
+
+.tableSection {
+  background: hsl(var(--card));
+  padding: 1.5rem;
+  border-radius: calc(var(--radius) * 3);
+  box-shadow: var(--shadow-md);
+  border: 1px solid hsl(var(--border));
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tableSection h2 {
+  color: hsl(var(--foreground));
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.totalCount {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+  background: hsl(var(--muted));
+  padding: 0.25rem 0.75rem;
+  border-radius: calc(var(--radius) * 2);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
+  border-radius: calc(var(--radius) * 2);
+  overflow: hidden;
+}
+
+.table th {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 0.875rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+.table td {
+  padding: 0.875rem;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background: hsl(var(--accent) / 0.2);
+}
+
+.codeCell {
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.noData {
+  text-align: center;
+  padding: 2rem;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.statusActive {
+  color: #10b981; /* 绿色 */
+  font-weight: 500;
+}
+
+.statusUsed {
+  color: #ef4444; /* 红色 */
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+}
+
+.pageButton {
+  padding: 0.5rem 1rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  cursor: pointer;
+}
+
+.pageButton:hover:not(:disabled) {
+  background: hsl(var(--accent) / 0.9);
+}
+
+.pageButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}

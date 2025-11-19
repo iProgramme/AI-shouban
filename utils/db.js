@@ -24,9 +24,15 @@ export async function testConnection() {
 // Initialize the database tables if they don't exist
 export async function initDb() {
   try {
+    // 先删除所有现有表（如果存在）
+    await pool.query(`DROP TABLE IF EXISTS generated_images CASCADE`);
+    await pool.query(`DROP TABLE IF EXISTS redemption_codes CASCADE`);
+    await pool.query(`DROP TABLE IF EXISTS orders CASCADE`);
+    await pool.query(`DROP TABLE IF EXISTS users CASCADE`);
+
     // Create users table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -35,7 +41,7 @@ export async function initDb() {
 
     // Create orders table for payment tracking
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS orders (
+      CREATE TABLE orders (
         id SERIAL PRIMARY KEY,
         order_id VARCHAR(255) UNIQUE NOT NULL,
         user_id INTEGER REFERENCES users(id),
@@ -48,12 +54,14 @@ export async function initDb() {
 
     // Create redemption_codes table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS redemption_codes (
+      CREATE TABLE redemption_codes (
         id SERIAL PRIMARY KEY,
         code VARCHAR(255) UNIQUE NOT NULL,
         order_id VARCHAR(255) REFERENCES orders(order_id),
         user_id INTEGER REFERENCES users(id),
         used BOOLEAN DEFAULT FALSE,
+        usage_count INTEGER DEFAULT 1, -- 可使用的次数
+        used_count INTEGER DEFAULT 0,  -- 已使用的次数
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         expires_at TIMESTAMP
       )
@@ -61,7 +69,7 @@ export async function initDb() {
 
     // Create generated_images table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS generated_images (
+      CREATE TABLE generated_images (
         id SERIAL PRIMARY KEY,
         original_image_url VARCHAR(500),
         generated_image_url VARCHAR(500),
@@ -119,20 +127,20 @@ export async function getOrderByOrderId(orderId) {
 }
 
 // Create redemption codes (batch)
-export async function createRedemptionCodes(orderId, userId, count) {
+export async function createRedemptionCodes(orderId, userId, count, usageCount = 1) {
   const codes = [];
   for (let i = 0; i < count; i++) {
     // Generate a random code
     const code = 'CODE' + Math.random().toString(36).substring(2, 10).toUpperCase();
-    
+
     const result = await pool.query(
-      'INSERT INTO redemption_codes (code, order_id, user_id) VALUES ($1, $2, $3) RETURNING code',
-      [code, orderId, userId]
+      'INSERT INTO redemption_codes (code, order_id, user_id, usage_count) VALUES ($1, $2, $3, $4) RETURNING code',
+      [code, orderId, userId, usageCount]
     );
-    
+
     codes.push(result.rows[0].code);
   }
-  
+
   return codes;
 }
 
@@ -140,25 +148,28 @@ export async function createRedemptionCodes(orderId, userId, count) {
 export async function verifyRedemptionCode(code) {
   try {
     const result = await pool.query(
-      'SELECT id, user_id, used, order_id FROM redemption_codes WHERE code = $1',
+      'SELECT id, user_id, used, order_id, usage_count, used_count FROM redemption_codes WHERE code = $1',
       [code]
     );
-    
+
     if (result.rows.length === 0) {
       return { valid: false, error: '无效的兑换码' };
     }
 
     const redemptionCode = result.rows[0];
 
-    if (redemptionCode.used) {
-      return { valid: false, error: '兑换码已被使用' };
+    // 检查是否已达到使用次数上限
+    if (redemptionCode.used_count >= redemptionCode.usage_count) {
+      return { valid: false, error: '兑换码使用次数已达上限' };
     }
-    
-    return { 
-      valid: true, 
-      userId: redemptionCode.user_id, 
+
+    return {
+      valid: true,
+      userId: redemptionCode.user_id,
       id: redemptionCode.id,
-      orderId: redemptionCode.order_id
+      orderId: redemptionCode.order_id,
+      usageCount: redemptionCode.usage_count,
+      usedCount: redemptionCode.used_count
     };
   } catch (error) {
     console.error('验证兑换码错误:', error);
@@ -166,15 +177,15 @@ export async function verifyRedemptionCode(code) {
   }
 }
 
-// Mark a redemption code as used
+// Mark a redemption code as used (increment used count)
 export async function useRedemptionCode(codeId) {
   try {
     await pool.query(
-      'UPDATE redemption_codes SET used = TRUE WHERE id = $1',
+      'UPDATE redemption_codes SET used_count = used_count + 1 WHERE id = $1',
       [codeId]
     );
   } catch (error) {
-    console.error('标记兑换码使用状态错误:', error);
+    console.error('更新兑换码使用次数错误:', error);
     throw error;
   }
 }

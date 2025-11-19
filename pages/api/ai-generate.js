@@ -59,6 +59,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: verificationResult.error });
     }
 
+    // 检查是否已达到使用次数上限
+    if (verificationResult.usedCount >= verificationResult.usageCount) {
+      return res.status(400).json({ message: '兑换码使用次数已达上限' });
+    }
+
     // Check file size directly without compression
     const originalImagePath = imageFile.filepath;
     const fileExtension = path.extname(imageFile.originalFilename);
@@ -186,7 +191,7 @@ export default async function handler(req, res) {
       generatedPublicPath = imageUrl;
     }
 
-    // Mark the redemption code as used
+    // Mark the redemption code as used (increment usage count)
     await useRedemptionCode(verificationResult.id);
 
     // Save the generated image record
