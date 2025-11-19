@@ -564,6 +564,12 @@
   background: hsl(var(--muted) / 0.5);
 }
 
+.uploadArea.dragActive {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  transform: scale(1.02);
+}
+
 .placeholder {
   margin-bottom: 1.5rem;
 }

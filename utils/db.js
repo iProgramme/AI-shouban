@@ -32,7 +32,7 @@ export async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     // Create orders table for payment tracking
     await pool.query(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -45,7 +45,7 @@ export async function initDb() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     // Create redemption_codes table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS redemption_codes (
@@ -58,7 +58,7 @@ export async function initDb() {
         expires_at TIMESTAMP
       )
     `);
-    
+
     // Create generated_images table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS generated_images (
@@ -70,7 +70,7 @@ export async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -198,21 +198,22 @@ export async function saveGeneratedImage(originalImageUrl, generatedImageUrl, us
 export async function getGalleryImages(limit = 20) {
   try {
     const result = await pool.query(`
-      SELECT 
+      SELECT
         id,
-        original_image_url, 
+        original_image_url,
         generated_image_url,
         created_at
-      FROM generated_images 
-      ORDER BY created_at DESC 
+      FROM generated_images
+      ORDER BY created_at DESC
       LIMIT $1
     `, [limit]);
-    
+
     return result.rows;
   } catch (error) {
     console.error('Error getting gallery images:', error);
     throw error;
   }
 }
+
 
 

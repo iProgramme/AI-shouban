@@ -13,6 +13,7 @@ export default function Home() {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [originalImage, setOriginalImage] = useState(null);
   const [error, setError] = useState('');
+  const [isDragActive, setIsDragActive] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -103,28 +104,50 @@ export default function Home() {
         return;
       }
 
-      // 生成兑换码
-      const newCode = generateRedemptionCode(option.description);
+      // 生成虚拟用户信息（实际应用中应使用真实用户信息）
+      const userId = 'guest'; // 在实际应用中，这里应该是登录用户的ID
 
-      // 创建购买记录
-      const purchaseRecord = {
-        id: Date.now(),
-        code: newCode,
-        type: option.description, // 使用描述替代标题
-        timestamp: new Date().toLocaleString('zh-CN'),
-        price: option.price
-      };
+      // 发送请求到后端API创建兑换码
+      const response = await fetch('/api/create-codes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId,
+          type: option.description,
+          price: option.price,
+          quantity: option.value
+        })
+      });
 
-      // 更新购买历史
-      const updatedHistory = [purchaseRecord, ...purchaseHistory].slice(0, 10);
-      saveHistoryToStorage(updatedHistory);
+      const data = await response.json();
 
-      // 关闭支付弹窗，填入兑换码
-      setShowPayment(false);
-      setCode(newCode);
+      if (response.ok) {
+        const codes = data.codes; // 假设API返回了生成的兑换码数组
 
-      // 显示成功提示
-      toast.success(`购买成功！兑换码已自动填入：${newCode}`);
+        // 创建购买记录
+        const purchaseRecord = {
+          id: Date.now(),
+          code: codes[0], // 使用第一个兑换码
+          type: option.description,
+          timestamp: new Date().toLocaleString('zh-CN'),
+          price: option.price
+        };
+
+        // 更新购买历史
+        const updatedHistory = [purchaseRecord, ...purchaseHistory].slice(0, 10);
+        saveHistoryToStorage(updatedHistory);
+
+        // 关闭支付弹窗，填入兑换码
+        setShowPayment(false);
+        setCode(codes[0]); // 使用返回的兑换码
+
+        // 显示成功提示
+        toast.success(`购买成功！兑换码已自动填入：${codes[0]}`);
+      } else {
+        throw new Error(data.message || '购买失败');
+      }
     } catch (err) {
       setError(err.message || '购买失败，请稍后重试');
     } finally {
@@ -160,11 +183,65 @@ export default function Home() {
     fetchGalleryItems();
   }, []);
 
+  // 拖拽相关函数
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragActive(true);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        setError('请选择图片文件');
+        e.dataTransfer.clearData();
+        return;
+      }
+
+      // 检查文件大小
+      if (file.size > 5 * 1024 * 1024) {
+        setError(`文件大小不能超过5MB，当前文件大小: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+        e.dataTransfer.clearData();
+        return;
+      }
+
+      // 处理上传
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+      setError('');
+      setGeneratedImage(null);
+      setOriginalImage(null);
+
+      e.dataTransfer.clearData();
+    }
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // 检查文件大小
       if (file.size > 5 * 1024 * 1024) {
-        setError('文件大小不能超过5MB');
+        setError(`文件大小不能超过5MB，当前文件大小: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
         return;
       }
 
@@ -192,22 +269,39 @@ export default function Home() {
     setError('');
 
     try {
-      // 验證兌換碼並生成圖像
-      // Mock verification and generation for demo purposes
-      if (code && code.trim() !== '') {
-        // 模拟验证过程
-        setOriginalImage('/02.png');
-        setGeneratedImage('/02.png'); // 使用相同圖片作為模擬
-        if(isClient) {
-          saveGeneratedHistory('/02.png'); // 保存到歷史記錄
+      // 创建 FormData 对象来发送文件和兑换码
+      const formData = new FormData();
+      formData.append('image', image);
+      formData.append('code', code);
+
+      // 调用后端 AI API 生成手办图像
+      const response = await fetch('/api/ai-generate', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 设置生成结果
+        setOriginalImage(data.originalImageUrl);
+        setGeneratedImage(data.generatedImageUrl);
+
+        if (isClient) {
+          saveGeneratedHistory(data.generatedImageUrl); // 保存到历史记录
         }
+
         setError('');
-        // 清空生成後的兌換碼
+        // 清空生成后的兑换码
         setCode('');
+
+        toast.success('生成成功！');
       } else {
-        setError('兑换码无效，请重新输入');
+        console.error('Generation error:', data);
+        setError(data.message || data.error || '生成失败，请稍后重试');
       }
     } catch (err) {
+      console.error('Generation error:', err);
       setError(err.message || '生成失败，请稍后重试');
     } finally {
       setIsProcessing(false);
@@ -406,7 +500,13 @@ export default function Home() {
           <div className={styles.leftSection}>
             <div className={styles.uploadSection}>
               <h3>上传图片</h3>
-              <div className={styles.uploadArea}>
+              <div
+                className={`${styles.uploadArea} ${isDragActive ? styles.dragActive : ''}`}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
                 {preview ? (
                   <>
                     <img
@@ -425,7 +525,7 @@ export default function Home() {
                 ) : (
                   <>
                     <div className={styles.placeholder}>
-                      <p>点击下方按钮上传图片</p>
+                      <p>点击下方按钮上传图片 或 拖拽图片到此处</p>
                       <p className={styles.hint}>支持 JPG、PNG 格式，最大 5MB</p>
                     </div>
                     <input
