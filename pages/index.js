@@ -628,20 +628,29 @@ export default function Home() {
 
                     {!showHistory ? (
                       <div className={styles.paymentOptions}>
-                        {redemptionOptions.map((option) => (
-                          <div
-                            key={option.id}
-                            className={styles.paymentOption}
-                            onClick={() => !paymentLoading && handlePayment(option)}
-                          >
-                            <div className={styles.paymentOptionPrice}>{option.price}</div>
-                            <p className={styles.paymentOptionDescription}>{option.description}</p>
+                        {paymentLoading ? (
+                          <div className={styles.loadingContainer}>
+                            <div className={styles.spinner}></div>
+                            <p>正在创建订单，请稍候...</p>
                           </div>
-                        ))}
-                        <div className={styles.contactSection}>
-                          <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
-                          <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>
-                        </div>
+                        ) : (
+                          <>
+                            {redemptionOptions.map((option) => (
+                              <div
+                                key={option.id}
+                                className={styles.paymentOption}
+                                onClick={() => !paymentLoading && handlePayment(option)}
+                              >
+                                <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                <p className={styles.paymentOptionDescription}>{option.description}</p>
+                              </div>
+                            ))}
+                            <div className={styles.contactSection}>
+                              <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
+                              <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ) : (
                       <div className={styles.purchaseHistory}>
