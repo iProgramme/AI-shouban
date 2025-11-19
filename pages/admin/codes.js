@@ -14,7 +14,7 @@ export default function AdminCodes() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('generate'); // 'generate' or 'list'
+  const [activeTab, setActiveTab] = useState('list'); // 'generate' or 'list'
   const itemsPerPage = 10;
 
   // 检查登录状态
@@ -122,6 +122,23 @@ export default function AdminCodes() {
     return new Date(dateString).toLocaleString('zh-CN');
   };
 
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSuccess('兑换码已复制到剪贴板');
+      // 清空成功消息
+      setTimeout(() => {
+        setSuccess('');
+      }, 2000);
+    } catch (err) {
+      console.error('复制失败:', err);
+      setSuccess('复制失败，请手动复制');
+      setTimeout(() => {
+        setSuccess('');
+      }, 2000);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -214,7 +231,18 @@ export default function AdminCodes() {
                       paginatedCodes.map((code) => (
                         <tr key={code.id}>
                           <td>{code.id}</td>
-                          <td className={styles.codeCell}>{code.code}</td>
+                          <td className={styles.codeCell}>
+                            <div className={styles.codeContainer}>
+                              <span className={styles.codeText}>{code.code}</span>
+                              <button
+                                className={styles.copyButton}
+                                onClick={() => copyToClipboard(code.code)}
+                                title="复制兑换码"
+                              >
+                                复制
+                              </button>
+                            </div>
+                          </td>
                           <td>{code.usage_count}</td>
                           <td>{code.used_count}</td>
                           <td>

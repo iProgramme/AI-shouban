@@ -64,12 +64,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: '兑换码使用次数已达上限' });
     }
 
-    // Check file size directly without compression
-    const originalImagePath = imageFile.filepath;
-    const fileExtension = path.extname(imageFile.originalFilename);
-    const originalFileSize = (await fs.stat(originalImagePath)).size;
-
-    // Check if file is larger than 5MB
+    // 验證文件大小，不超過5MB
+    const originalFileSize = (await fs.stat(imageFile.filepath)).size;
     const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
     if (originalFileSize > MAX_SIZE) {
@@ -80,23 +76,39 @@ export default async function handler(req, res) {
       });
     }
 
+    // 直接讀取圖片內容而不保存到服務器
+    const fileExtension = path.extname(imageFile.originalFilename);
     const timestamp = Date.now();
-    const originalFileName = `original_${timestamp}${fileExtension}`;
-    const originalPublicPath = `/uploads/${originalFileName}`;
-    const originalPublicFullPath = path.join(process.cwd(), 'public', originalPublicPath);
-    await fs.copyFile(originalImagePath, originalPublicFullPath);
+    const originalPublicPath = `/temp/original_${timestamp}`; // 虛擬路徑，實際不保存
 
 
     if (!NANO_BANANA_API_KEY) {
       return res.status(500).json({ message: 'API密钥未配置' });
     }
 
-    // Get image as base64 for prompt
-    const imageBuffer = await fs.readFile(originalImagePath);
+    // Get image as base64 for prompt (directly from uploaded file)
+    const imageBuffer = await fs.readFile(imageFile.filepath);
     const imageBase64 = imageBuffer.toString('base64');
 
     // Create a prompt using the image
-    const prompt = process.env.IMAGE_GENERATION_PROMPT || `请将这张人物照片转换为精美的手办风格图像。请保持原始人物的特征，但以手办材质和风格呈现。`;
+    // 使用默认文本配置，也可以根据环境变量选择不同的配置
+    const appType = process.env.APP_TYPE || 'default';
+    const texts = require('../../utils/texts');
+    let selectedTexts;
+
+    switch(appType) {
+      case 'ink':
+        selectedTexts = texts.inkPaintingTexts;
+        break;
+      case '3d':
+        selectedTexts = texts.threeDTexts;
+        break;
+      case 'default':
+      default:
+        selectedTexts = texts.defaultTexts;
+    }
+
+    const prompt = process.env.IMAGE_GENERATION_PROMPT || selectedTexts.imageGenerationPrompt;
 
     const requestPayload = {
       model: process.env.MODEL_NAME || "gpt-4o-mini", // Using a default model, can be configured
@@ -174,27 +186,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Save the generated image
-    let generatedPublicPath = '';
-    if (isBase64) {
-      // Save base64 image to file
-      const imageType = imageUrl.split('/')[1].split(';')[0];
-      const base64Data = imageUrl.split(',')[1];
-      const imageBuffer = Buffer.from(base64Data, 'base64');
-      const generatedFileName = `generated_${timestamp}.${imageType}`;
-      generatedPublicPath = `/uploads/${generatedFileName}`;
-      const generatedPublicFullPath = path.join(process.cwd(), 'public', generatedPublicPath);
-      await fs.writeFile(generatedPublicFullPath, imageBuffer);
-    } else {
-      // If we have a URL, we could potentially download and save it
-      // For now, we'll return the URL directly
-      generatedPublicPath = imageUrl;
-    }
+    let generatedPublicPath = imageUrl; // 直接使用API返回的URL或base64字符串
 
     // Mark the redemption code as used (increment usage count)
     await useRedemptionCode(verificationResult.id);
 
-    // Save the generated image record
+    // Save the generated image record (using virtual paths)
     await saveGeneratedImage(
       originalPublicPath,
       generatedPublicPath,
@@ -205,7 +202,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       message: '图片生成成功',
       generatedImageUrl: generatedPublicPath,
-      originalImageUrl: originalPublicPath
+      originalImageUrl: `/temp/original_${Date.now()}` // 虚拟路径
     });
   } catch (error) {
     console.error('AI图片生成错误:', error);

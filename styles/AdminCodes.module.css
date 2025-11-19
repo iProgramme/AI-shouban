@@ -283,6 +283,34 @@
   font-family: monospace;
   font-size: 0.9rem;
   word-break: break-all;
+  vertical-align: middle;
+}
+
+.codeContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.codeText {
+  flex: 1;
+  word-break: break-all;
+}
+
+.copyButton {
+  padding: 0.25rem 0.5rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border: none;
+  border-radius: calc(var(--radius) * 2);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.copyButton:hover {
+  background: hsl(var(--accent) / 0.9);
 }
 
 .noData {

@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { createRedemptionCodes } from '../../utils/db';
+import { createRedemptionCodes, createOrder } from '../../utils/db';
 
 // Create a connection pool for Neon database
 const pool = new Pool({
@@ -29,9 +29,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: '参数格式错误，必须为正整数' });
     }
 
+    // 为管理员操作创建一个虚拟订单
+    const orderId = 'ADMIN_' + Date.now();
+    const userId = 1; // 使用默认管理员用户ID
+
+    // 先创建一个虚拟订单避免外键约束错误
+    await createOrder(orderId, userId, 0); // 金额设为0
+
     // 生成兑换码 (orderId, userId, count, usageCount)
-    // 使用默认值作为orderId和userId，因为这是管理员操作
-    const codes = await createRedemptionCodes('ADMIN_GEN', 1, codeCount, usageCount);
+    const codes = await createRedemptionCodes(orderId, userId, codeCount, usageCount);
 
     res.status(200).json({
       message: '兑换码生成成功',

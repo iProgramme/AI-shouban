@@ -3,7 +3,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import styles from '../styles/Home.module.css';
-import texts from '../utils/texts';
+import { getLocalizedTexts } from '../utils/texts';
+
+const texts = getLocalizedTexts();
 
 export default function Home() {
   const [galleryItems, setGalleryItems] = useState([]);
@@ -373,7 +375,7 @@ export default function Home() {
         </div>
         <div className={styles.heroImage}>
           <img
-            src="/images/hero.png"
+            src={texts.heroImage}
             alt={texts.pageDescription}
             className={styles.heroPreviewImage}
           />
@@ -448,7 +450,7 @@ export default function Home() {
             <div className={styles.galleryPair}>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/input1.png"
+                  src={texts.galleryImage1Input}
                   alt="Original"
                   className={styles.galleryImage}
                 />
@@ -456,7 +458,7 @@ export default function Home() {
               </div>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/output1.png"
+                  src={texts.galleryImage1Output}
                   alt="Generated"
                   className={styles.galleryImage}
                 />
@@ -468,7 +470,7 @@ export default function Home() {
             <div className={styles.galleryPair}>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/input1.png"
+                  src={texts.galleryImage2Input}
                   alt="Original"
                   className={styles.galleryImage}
                 />
@@ -476,7 +478,7 @@ export default function Home() {
               </div>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/output1.png"
+                  src={texts.galleryImage2Output}
                   alt="Generated"
                   className={styles.galleryImage}
                 />
@@ -488,7 +490,7 @@ export default function Home() {
             <div className={styles.galleryPair}>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/input1.png"
+                  src={texts.galleryImage3Input}
                   alt="Original"
                   className={styles.galleryImage}
                 />
@@ -496,7 +498,27 @@ export default function Home() {
               </div>
               <div className={styles.galleryImageContainer}>
                 <img
-                  src="/images/output1.png"
+                  src={texts.galleryImage3Output}
+                  alt="Generated"
+                  className={styles.galleryImage}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage4Input}
+                  alt="Original"
+                  className={styles.galleryImage}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage4Output}
                   alt="Generated"
                   className={styles.galleryImage}
                 />
@@ -680,6 +702,11 @@ export default function Home() {
                 {isProcessing ? texts.generateProcessing : texts.generateButton}
               </button>
 
+              {processingTime && (
+                <p className={styles.processingTime}>{texts.processingTime}{processingTime}{texts.seconds}</p>
+              )}
+              <p className={styles.downloadWarning}>{texts.downloadWarning}</p>
+
               {error && <div className={styles.error}>{error}</div>}
             </div>
           </div>
@@ -696,10 +723,6 @@ export default function Home() {
                       className={styles.resultImage}
                     />
                     <p className={styles.downloadHint}>{texts.downloadHint}</p>
-                    <p className={styles.downloadWarning}>{texts.downloadWarning}</p>
-                    {processingTime && (
-                      <p className={styles.processingTime}>{texts.processingTime}{processingTime}{texts.seconds}</p>
-                    )}
                   </div>
                 </div>
               </div>
