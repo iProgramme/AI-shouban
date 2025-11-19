@@ -14,7 +14,7 @@ export const config = {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: '请求方法不被允许' });
   }
 
   try {
@@ -45,11 +45,11 @@ export default async function handler(req, res) {
     const imageFile = Array.isArray(files.image) ? files.image[0] : files.image;
 
     if (!code) {
-      return res.status(400).json({ message: 'Redemption code is required' });
+      return res.status(400).json({ message: '请提供兑换码' });
     }
 
     if (!imageFile) {
-      return res.status(400).json({ message: 'Image file is required' });
+      return res.status(400).json({ message: '请提供图片文件' });
     }
 
     // Verify the redemption code
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
 
 
     if (!NANO_BANANA_API_KEY) {
-      return res.status(500).json({ message: 'API key is not configured' });
+      return res.status(500).json({ message: 'API密钥未配置' });
     }
 
     // Get image as base64 for prompt
@@ -198,14 +198,14 @@ export default async function handler(req, res) {
     );
 
     res.status(200).json({
-      message: 'Image generated successfully',
+      message: '图片生成成功',
       generatedImageUrl: generatedPublicPath,
       originalImageUrl: originalPublicPath
     });
   } catch (error) {
-    console.error('AI image generation error:', error);
+    console.error('AI图片生成错误:', error);
     res.status(500).json({
-      message: 'Error generating image',
+      message: '图片生成失败',
       error: error.message,
       ...(error.response ? { responseError: error.response.data } : {})
     });

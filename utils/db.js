@@ -13,10 +13,10 @@ const pool = new Pool({
 export async function testConnection() {
   try {
     await pool.query('SELECT NOW()');
-    console.log('Database connection successful');
+    console.log('数据库连接成功');
     return true;
   } catch (error) {
-    console.error('Database connection failed:', error);
+    console.error('数据库连接失败:', error);
     return false;
   }
 }
@@ -71,9 +71,9 @@ export async function initDb() {
       )
     `);
 
-    console.log('Database initialized successfully');
+    console.log('数据库初始化成功');
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('数据库初始化错误:', error);
     throw error;
   }
 }
@@ -145,13 +145,13 @@ export async function verifyRedemptionCode(code) {
     );
     
     if (result.rows.length === 0) {
-      return { valid: false, error: 'Invalid code' };
+      return { valid: false, error: '无效的兑换码' };
     }
-    
+
     const redemptionCode = result.rows[0];
-    
+
     if (redemptionCode.used) {
-      return { valid: false, error: 'Code already used' };
+      return { valid: false, error: '兑换码已被使用' };
     }
     
     return { 
@@ -161,8 +161,8 @@ export async function verifyRedemptionCode(code) {
       orderId: redemptionCode.order_id
     };
   } catch (error) {
-    console.error('Error verifying redemption code:', error);
-    return { valid: false, error: 'Database error' };
+    console.error('验证兑换码错误:', error);
+    return { valid: false, error: '数据库错误' };
   }
 }
 
@@ -174,7 +174,7 @@ export async function useRedemptionCode(codeId) {
       [codeId]
     );
   } catch (error) {
-    console.error('Error marking code as used:', error);
+    console.error('标记兑换码使用状态错误:', error);
     throw error;
   }
 }
@@ -189,7 +189,7 @@ export async function saveGeneratedImage(originalImageUrl, generatedImageUrl, us
     
     return result.rows[0].id;
   } catch (error) {
-    console.error('Error saving generated image:', error);
+    console.error('保存生成图片错误:', error);
     throw error;
   }
 }
@@ -210,7 +210,7 @@ export async function getGalleryImages(limit = 20) {
 
     return result.rows;
   } catch (error) {
-    console.error('Error getting gallery images:', error);
+    console.error('获取画廊图片错误:', error);
     throw error;
   }
 }

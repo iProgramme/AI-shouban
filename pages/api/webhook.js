@@ -14,7 +14,7 @@ export const config = {
 // Payment webhook handler
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: '请求方法不被允许' });
   }
 
   try {

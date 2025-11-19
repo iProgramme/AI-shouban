@@ -51,7 +51,7 @@ export async function wxPay(options) {
     
     return response.data;
   } catch (error) {
-    console.error('Payment error:', error);
+    console.error('支付错误:', error);
     throw error;
   }
 }

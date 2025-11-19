@@ -17,6 +17,8 @@ export default function Home() {
   const [showPayment, setShowPayment] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [startTime, setStartTime] = useState(null);
+  const [processingTime, setProcessingTime] = useState(null);
   const [redemptionOptions, setRedemptionOptions] = useState([
     { id: 1, price: '2.99元', description: '1张', value: 1 },
     { id: 2, price: '7.99元', description: '3张', value: 3 },
@@ -266,6 +268,8 @@ export default function Home() {
     }
 
     setIsProcessing(true);
+    setProcessingTime(null);
+    setStartTime(Date.now());
     setError('');
 
     try {
@@ -291,11 +295,14 @@ export default function Home() {
           saveGeneratedHistory(data.generatedImageUrl); // 保存到历史记录
         }
 
-        setError('');
-        // 清空生成后的兑换码
-        setCode('');
+        // 计算处理时间
+        const endTime = Date.now();
+        const timeSpent = ((endTime - startTime) / 1000).toFixed(2); // 转换为秒
+        setProcessingTime(timeSpent);
 
-        toast.success('生成成功！');
+        setError('');
+
+        toast.success(`生成成功！耗时 ${timeSpent} 秒`);
       } else {
         console.error('Generation error:', data);
         setError(data.message || data.error || '生成失败，请稍后重试');
@@ -305,6 +312,7 @@ export default function Home() {
       setError(err.message || '生成失败，请稍后重试');
     } finally {
       setIsProcessing(false);
+      // 不再清空兑换码输入框
     }
   };
 
@@ -675,6 +683,10 @@ export default function Home() {
                       className={styles.resultImage}
                     />
                     <p className={styles.downloadHint}>右键点击或长按图片可下载</p>
+                    <p className={styles.downloadWarning}>⚠️ 重要提示：图片将在24小时后失效，请尽快下载保存</p>
+                    {processingTime && (
+                      <p className={styles.processingTime}>处理耗时：{processingTime} 秒</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -753,7 +765,6 @@ export default function Home() {
           <div className={styles.footerSection}>
             <h4>快速链接</h4>
             <Link href="/">首页</Link>
-            <Link href="/gallery">作品展示</Link>
             <Link href="/contact">联系我们</Link>
           </div>
           <div className={styles.footerSection}>

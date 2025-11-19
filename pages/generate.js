@@ -158,7 +158,6 @@ export default function Generate() {
         <div className={styles.navLinks}>
           <Link href="/" className={styles.navLink}>首页</Link>
           <Link href="/generate" className={styles.navLinkActive}>生成图片</Link>
-          <Link href="/gallery" className={styles.navLink}>作品展示</Link>
           <Link href="/contact" className={styles.navLink}>联系我们</Link>
         </div>
       </nav>
@@ -288,7 +287,6 @@ export default function Generate() {
           <div className={styles.footerSection}>
             <h4>快速链接</h4>
             <Link href="/generate">生成图片</Link>
-            <Link href="/gallery">作品展示</Link>
             <Link href="/contact">联系我们</Link>
           </div>
           <div className={styles.footerSection}>

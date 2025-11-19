@@ -88,7 +88,6 @@ export default function FAQ() {
           <div className={styles.footerSection}>
             <h4>快速链接</h4>
             <Link href="/">首页</Link>
-            <Link href="/gallery">作品展示</Link>
             <Link href="/contact">联系我们</Link>
           </div>
           <div className={styles.footerSection}>

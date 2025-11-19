@@ -761,6 +761,32 @@
   font-style: italic;
 }
 
+.downloadWarning {
+  color: hsl(var(--destructive));
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 0.25rem;
+  font-weight: 500;
+  background: hsl(var(--destructive) / 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: calc(var(--radius) * 2);
+  display: inline-block;
+  width: 100%;
+}
+
+.processingTime {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 0.25rem;
+  font-weight: 500;
+  background: hsl(var(--accent) / 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: calc(var(--radius) * 2);
+  display: inline-block;
+  width: 100%;
+}
+
 .historySection {
   margin-top: 2rem;
 }

@@ -2,14 +2,14 @@ import { createRedemptionCodes, createUser, createOrder } from '../../utils/db';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: '请求方法不被允许' });
   }
 
   try {
     const { userId, type, price, quantity } = req.body;
 
     if (!userId || !type || !price || !quantity) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: '缺少必需的参数' });
     }
 
     // 创建或获取用户
@@ -26,14 +26,14 @@ export default async function handler(req, res) {
     const codes = await createRedemptionCodes(orderId, actualUserId, quantity);
 
     res.status(200).json({
-      message: 'Redemption codes created successfully',
+      message: '兑换码创建成功',
       codes: codes
     });
   } catch (error) {
-    console.error('Create redemption code error:', error);
-    res.status(500).json({ 
-      message: 'Error creating redemption codes', 
-      error: error.message 
+    console.error('创建兑换码错误:', error);
+    res.status(500).json({
+      message: '创建兑换码失败',
+      error: error.message
     });
   }
 }

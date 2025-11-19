@@ -6,14 +6,14 @@ import { uuid } from '../../utils/tools';
 // API route to initiate payment
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: '请求方法不被允许' });
   }
 
   try {
     const { amount, quantity } = req.body;
 
     if (!amount || !quantity) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: '缺少必需的参数' });
     }
 
     // Generate order ID
@@ -38,14 +38,14 @@ export default async function handler(req, res) {
       backendUrl: backendUrl,
     });
 
-    res.status(200).json({ 
-      message: 'Payment initiated successfully', 
+    res.status(200).json({
+      message: '支付发起成功',
       paymentResult,
       orderId
     });
   } catch (error) {
-    console.error('Payment initiation error:', error);
-    res.status(500).json({ message: 'Error initiating payment', error: error.message });
+    console.error('支付发起错误:', error);
+    res.status(500).json({ message: '支付发起失败', error: error.message });
   }
 }
 
