@@ -272,12 +272,12 @@ const defaultTexts = {
   // 作品展示图片
   galleryImage1Input: '/images/input1.png',
   galleryImage1Output: '/images/output1.png',
-  galleryImage2Input: '/images/input1.png',
-  galleryImage2Output: '/images/output1.png',
-  galleryImage3Input: '/images/input1.png',
-  galleryImage3Output: '/images/output1.png',
-  galleryImage4Input: '/images/input1.png',
-  galleryImage4Output: '/images/output1.png',
+  galleryImage2Input: '/images/input2.png',
+  galleryImage2Output: '/images/output2.png',
+  galleryImage3Input: '/images/input3.png',
+  galleryImage3Output: '/images/output3.png',
+  galleryImage4Input: '/images/input4.png',
+  galleryImage4Output: '/images/output4.png',
   heroImage: '/images/hero.png',
 
   // 生成提示词

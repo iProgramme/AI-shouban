@@ -366,7 +366,7 @@
 
 .galleryImage {
   width: 100%;
-  height: 250px; /* 固定高度 */
+  height: 400px; /* 固定高度 */
   object-fit: contain; /* 保持原始比例 */
   border-radius: calc(var(--radius) * 2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;

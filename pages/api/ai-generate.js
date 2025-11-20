@@ -157,6 +157,7 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${NANO_BANANA_API_KEY}`
     };
+    let fullContent = "";
 
     try {
       // Call the AI API with timeout
@@ -173,12 +174,14 @@ export default async function handler(req, res) {
         }
       );
 
+      // mock数据
+      // const response = {data:{"id":"chatcmpl-o7iplpqH5znTkhVkNlzQzVeON7pcB5","object":"chat.completion","created":1763631761,"model":"gemini-2.5-flash-image-preview","choices":[{"index":0,"message":{"role":"assistant","content":"![image](https://cloudflarer2.nananobanana.com/png/1763631761164_984.png)","reasoning_content":null},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":2351,"completion_tokens":1290,"total_tokens":3641}}}
+
       // 检查API响应是否包含错误
       if (response.data.error) {
         throw new Error(`AI API 错误: ${response.data.error.message || '未知错误'}`);
       }
 
-      let fullContent = "";
       let finishReason = "";
       console.log('生图入参:', process.env.MODEL_NAME, prompt)
       console.log('data:', JSON.stringify(response.data))
