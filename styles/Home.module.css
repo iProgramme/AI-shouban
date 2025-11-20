@@ -1854,4 +1854,9 @@
   box-shadow: var(--shadow-md);
 }
 
+/* 测试按钮样式 - 保持与普通支付选项相同的基础样式，但背景不同 */
+.paymentOptions .paymentOption[style*="linear-gradient"] {
+  background: linear-gradient(45deg, #ff6b6b, #ffa500) !important;
+}
+
 

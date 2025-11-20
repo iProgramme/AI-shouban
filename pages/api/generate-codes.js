@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { createRedemptionCodes, createOrder } from '../../utils/db';
+import { createRedemptionCodes, createOrder, createUser } from '../../utils/db';
 
 // Create a connection pool for Neon database
 const pool = new Pool({
@@ -31,7 +31,30 @@ export default async function handler(req, res) {
 
     // 为管理员操作创建一个虚拟订单
     const orderId = 'ADMIN_' + Date.now();
-    const userId = 1; // 使用默认管理员用户ID
+
+    // 创建或获取系统用户
+    let userId = await createUser('system@default.com');
+
+    if (!userId) {
+      // 如果创建失败，尝试查找现有的用户
+      const result = await pool.query('SELECT id FROM users WHERE email = $1 LIMIT 1', ['system@default.com']);
+      if (result.rows.length > 0) {
+        userId = result.rows[0].id;
+      } else {
+        // 查询任意一个现有用户
+        const anyUserResult = await pool.query('SELECT id FROM users LIMIT 1');
+        if (anyUserResult.rows.length > 0) {
+          userId = anyUserResult.rows[0].id;
+        } else {
+          // 如果没有任何用户，创建一个系统用户
+          const newUserResult = await pool.query(
+            'INSERT INTO users (email) VALUES ($1) RETURNING id',
+            ['system@default.com']
+          );
+          userId = newUserResult.rows[0].id;
+        }
+      }
+    }
 
     // 先创建一个虚拟订单避免外键约束错误
     await createOrder(orderId, userId, 0); // 金额设为0
@@ -45,9 +68,9 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('生成兑换码错误:', error);
-    res.status(500).json({ 
-      message: '生成兑换码失败', 
-      error: error.message 
+    res.status(500).json({
+      message: '生成兑换码失败',
+      error: error.message
     });
   }
 }

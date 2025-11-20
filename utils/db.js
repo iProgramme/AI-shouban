@@ -75,6 +75,8 @@ export async function initDb() {
         generated_image_url VARCHAR(500),
         user_id INTEGER REFERENCES users(id),
         redemption_code_id INTEGER REFERENCES redemption_codes(id),
+        status VARCHAR(50) DEFAULT 'success',
+        error_message TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -203,10 +205,25 @@ export async function saveGeneratedImage(originalImageUrl, generatedImageUrl, us
       'INSERT INTO generated_images (original_image_url, generated_image_url, user_id, redemption_code_id) VALUES ($1, $2, $3, $4) RETURNING id',
       [originalImageUrl, generatedImageUrl, userId, redemptionCodeId]
     );
-    
+
     return result.rows[0].id;
   } catch (error) {
     console.error('保存生成图片错误:', error);
+    throw error;
+  }
+}
+
+// Save generation result (success or failure)
+export async function saveGenerationResult(originalImageUrl, resultData, userId, redemptionCodeId, status = 'success', errorMessage = null) {
+  try {
+    const result = await pool.query(
+      'INSERT INTO generated_images (original_image_url, generated_image_url, user_id, redemption_code_id, status, error_message) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [originalImageUrl, resultData, userId, redemptionCodeId, status, errorMessage]
+    );
+
+    return result.rows[0].id;
+  } catch (error) {
+    console.error('保存生成结果错误:', error);
     throw error;
   }
 }

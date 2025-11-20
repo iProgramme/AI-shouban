@@ -20,7 +20,13 @@ export default async function handler(req, res) {
     const orderId = 'ORDER' + Date.now() + '-' + uuid().replace(/-/g, '').substring(0, 8).toUpperCase();
     
     // Convert price to number and format
-    const amount = parseFloat(price.replace('元', ''));
+    // 处理价格字符串，支持小数点
+    let amount = parseFloat(price.replace('元', ''));
+
+    // 特殊处理0.01元测试订单
+    if (price === '0.01元') {
+      amount = 0.01;
+    }
 
     // Create or get user (for demo, we use a default user if none provided)
     // In production, you should get user from session/auth

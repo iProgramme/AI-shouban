@@ -28,6 +28,7 @@ export default function Home() {
     { id: 2, price: '7.99元', description: '3张', value: 3 },
     { id: 3, price: '19.99元', description: '10张', value: 10 },
     { id: 4, price: '联系我们', description: '20张以上', value: 20 },
+    { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true }, // 隐藏的测试套餐
   ]);
 
   // 从 localStorage 获取购买历史
@@ -42,6 +43,8 @@ export default function Home() {
   // 支付二维码状态
   const [paymentQRCode, setPaymentQRCode] = useState(null);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null); // 当前订单ID
+  const [isPolling, setIsPolling] = useState(false); // 是否正在轮询
 
   // 生成历史记录状态
   const [generatedHistory, setGeneratedHistory] = useState([]);
@@ -137,9 +140,13 @@ export default function Home() {
         if (data.qrCodeUrl) {
           // 显示支付二维码
           setPaymentQRCode(data.qrCodeUrl);
+          setCurrentOrderId(data.orderId); // 保存订单ID
           setShowQRCode(true);
           setPaymentLoading(false);
           toast.success('请扫描二维码完成支付');
+
+          // 开始轮询检查订单状态
+          startOrderPolling(data.orderId);
         } else if (data.paymentUrl) {
           // 如果没有二维码，尝试直接跳转到支付页面
           setShowPayment(false);
@@ -160,6 +167,131 @@ export default function Home() {
     } finally {
       setPaymentLoading(false);
     }
+  };
+
+  // 状态用于控制是否显示测试选项
+  const [showTestOption, setShowTestOption] = useState(false);
+
+  // 检查URL参数是否包含test=true
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isTest = urlParams.get('test') === 'true';
+      setShowTestOption(isTest);
+    }
+  }, []);
+
+  // 处理测试支付
+  const handleTestPayment = async () => {
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      // 发送请求到后端API创建测试订单，使用与标准套餐相同的API端点
+      const response = await fetch('/api/create-codes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: null, // 使用访客用户
+          type: '测试套餐',
+          price: '0.01元',
+          quantity: 1
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.qrCodeUrl) {
+          // 显示支付二维码
+          setPaymentQRCode(data.qrCodeUrl);
+          setCurrentOrderId(data.orderId); // 保存订单ID
+          setShowQRCode(true);
+          setPaymentLoading(false);
+          toast.success('请扫描二维码完成支付');
+
+          // 开始轮询检查订单状态
+          startOrderPolling(data.orderId);
+        } else if (data.paymentUrl) {
+          // 如果没有二维码，尝试直接跳转到支付页面
+          setShowPayment(false);
+          toast.success('正在跳转到支付页面...');
+
+          // 重定向到支付页面
+          setTimeout(() => {
+            window.location.href = data.paymentUrl;
+          }, 1500);
+        } else {
+          throw new Error('未能获取支付信息');
+        }
+      } else {
+        throw new Error(data.message || '购买失败');
+      }
+    } catch (err) {
+      setError(err.message || '购买失败，请稍后重试');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  // 轮询订单状态
+  const startOrderPolling = (orderId) => {
+    if (isPolling) return; // 防止重复轮询
+
+    setIsPolling(true);
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/check-order-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ orderId })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'paid') {
+          // 订单已支付，停止轮询
+          clearInterval(pollInterval);
+          setIsPolling(false);
+
+          // 获取兑换码并填入输入框
+          if (result.redemptionCodes && result.redemptionCodes.length > 0) {
+            const redemptionCode = result.redemptionCodes[0]; // 取第一个兑换码
+            setCode(redemptionCode); // 填入兑换码输入框
+            toast.success(`支付成功！兑换码已自动填入：${redemptionCode}`);
+          } else {
+            toast.success('支付成功！兑换码已生成');
+          }
+
+          // 关闭二维码弹窗
+          setTimeout(() => {
+            setShowQRCode(false);
+            setShowPayment(false);
+          }, 1500);
+        } else if (result.status === 'not_found') {
+          // 订单不存在，停止轮询
+          clearInterval(pollInterval);
+          setIsPolling(false);
+        }
+      } catch (error) {
+        console.error('轮询订单状态失败:', error);
+        clearInterval(pollInterval);
+        setIsPolling(false);
+      }
+    }, 3000); // 每3秒检查一次
+
+    // 设置最大轮询时间，防止无限轮询（5分钟）
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      setIsPolling(false);
+      if (showQRCode) {
+        toast.info('二维码已超时，请重新购买');
+      }
+    }, 300000); // 5分钟
   };
 
   // 复制兑换码到剪贴板
@@ -670,16 +802,36 @@ export default function Home() {
                               </div>
                             ) : (
                               <>
-                                {redemptionOptions.map((option) => (
+                                {redemptionOptions.map((option) => {
+                                  // 只渲染非隐藏的选项
+                                  if (option.hidden) return null;
+
+                                  return (
+                                    <div
+                                      key={option.id}
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handlePayment(option)}
+                                    >
+                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    </div>
+                                  );
+                                })}
+                                {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
+                                {showTestOption && (
                                   <div
-                                    key={option.id}
                                     className={styles.paymentOption}
-                                    onClick={() => !paymentLoading && handlePayment(option)}
+                                    onClick={() => !paymentLoading && handleTestPayment()}
+                                    style={{
+                                      background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+                                      cursor: 'pointer'
+                                    }}
                                   >
-                                    <div className={styles.paymentOptionPrice}>{option.price}</div>
-                                    <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    <div className={styles.paymentOptionPrice}>0.01元测试</div>
+                                    <p className={styles.paymentOptionDescription}>系统测试套餐</p>
                                   </div>
-                                ))}
+                                )}
+
                                 <div className={styles.contactSection}>
                                   <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
                                   <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>

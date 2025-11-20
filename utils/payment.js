@@ -23,7 +23,7 @@ export async function wxPay(options) {
     total_fee: options.money, //金额，最多两位小数
     title: options.title,
     time: nowDate(),
-    notify_url: `${options.backendUrl}/api/webhook`, //通知回调网址
+    notify_url: `https://3a451bee82e5.ngrok-free.app/api/webhook`, //通知回调网址
     nonce_str: uuid(), //随机值
     type: 'WAP',
     wap_url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
