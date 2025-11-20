@@ -130,8 +130,14 @@ export async function getOrderByOrderId(orderId) {
 export async function createRedemptionCodes(orderId, userId, count, usageCount = 1) {
   const codes = [];
   for (let i = 0; i < count; i++) {
-    // Generate a random code
-    const code = 'CODE' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    // Generate a random code - 更符合实际使用的兑换码格式
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let j = 0; j < 8; j++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    // 确保兑换码在数据库中是唯一的
+    code = 'AI' + code;
 
     const result = await pool.query(
       'INSERT INTO redemption_codes (code, order_id, user_id, usage_count) VALUES ($1, $2, $3, $4) RETURNING code',

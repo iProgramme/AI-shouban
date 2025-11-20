@@ -5,7 +5,7 @@ import { nowDate, uuid } from './tools';
 
 function getHash(params, appSecret) {
   const sortedParams = Object.keys(params)
-    .filter(key => params[key] && key !== 'hash') //过滤掉空值和hash本身
+    .filter(key => params[key] !== undefined && params[key] !== null && key !== 'hash') //过滤掉空值和hash本身
     .sort()
     .map(key => `${key}=${params[key]}`)
     .join('&');
@@ -29,29 +29,25 @@ export async function wxPay(options) {
     wap_url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     wap_name: 'AI手办生成',
   };
-  
+
   const hash = getHash(params, process.env.PAYMENT_SECRET);
-  
-  // 发送 POST 请求
-  const requestParams = new URLSearchParams({
-    ...params,
-    hash,
-  });
-  
+
   try {
+    // 使用POST请求发送支付参数并获取响应
     const response = await axios.post(
       process.env.PAYMENT_API_URL || 'https://api.xunhupay.com/payment/do.html',
-      requestParams,
+      new URLSearchParams({ ...params, hash }).toString(),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       }
     );
-    
+
+    // 返回支付API的完整响应
     return response.data;
   } catch (error) {
-    console.error('支付错误:', error);
+    console.error('支付API请求错误:', error);
     throw error;
   }
 }

@@ -108,7 +108,7 @@ export default async function handler(req, res) {
         selectedTexts = texts.defaultTexts;
     }
 
-    const prompt = process.env.IMAGE_GENERATION_PROMPT || selectedTexts.imageGenerationPrompt;
+    const prompt = selectedTexts.imageGenerationPrompt;
 
     const requestPayload = {
       model: process.env.MODEL_NAME || "gpt-4o-mini", // Using a default model, can be configured

@@ -39,6 +39,10 @@ export default function Home() {
     return [];
   });
 
+  // 支付二维码状态
+  const [paymentQRCode, setPaymentQRCode] = useState(null);
+  const [showQRCode, setShowQRCode] = useState(false);
+
   // 生成历史记录状态
   const [generatedHistory, setGeneratedHistory] = useState([]);
   const [isClient, setIsClient] = useState(false);
@@ -110,10 +114,10 @@ export default function Home() {
         return;
       }
 
-      // 生成虚拟用户信息（实际应用中应使用真实用户信息）
-      const userId = 'guest'; // 在实际应用中，这里应该是登录用户的ID
+      // 不传用户ID，让后端创建访客用户
+      const userId = null; // 在实际应用中，这里应该是登录用户的ID
 
-      // 发送请求到后端API创建兑换码
+      // 发送请求到后端API创建订单
       const response = await fetch('/api/create-codes', {
         method: 'POST',
         headers: {
@@ -130,27 +134,24 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        const codes = data.codes; // 假设API返回了生成的兑换码数组
+        if (data.qrCodeUrl) {
+          // 显示支付二维码
+          setPaymentQRCode(data.qrCodeUrl);
+          setShowQRCode(true);
+          setPaymentLoading(false);
+          toast.success('请扫描二维码完成支付');
+        } else if (data.paymentUrl) {
+          // 如果没有二维码，尝试直接跳转到支付页面
+          setShowPayment(false);
+          toast.success('正在跳转到支付页面...');
 
-        // 创建购买记录
-        const purchaseRecord = {
-          id: Date.now(),
-          code: codes[0], // 使用第一个兑换码
-          type: option.description,
-          timestamp: new Date().toLocaleString('zh-CN'),
-          price: option.price
-        };
-
-        // 更新购买历史
-        const updatedHistory = [purchaseRecord, ...purchaseHistory].slice(0, 10);
-        saveHistoryToStorage(updatedHistory);
-
-        // 关闭支付弹窗，填入兑换码
-        setShowPayment(false);
-        setCode(codes[0]); // 使用返回的兑换码
-
-        // 显示成功提示
-        toast.success(`购买成功！兑换码已自动填入：${codes[0]}`);
+          // 重定向到支付页面
+          setTimeout(() => {
+            window.location.href = data.paymentUrl;
+          }, 1500);
+        } else {
+          throw new Error('未能获取支付信息');
+        }
       } else {
         throw new Error(data.message || '购买失败');
       }
@@ -627,31 +628,67 @@ export default function Home() {
                     </div>
 
                     {!showHistory ? (
-                      <div className={styles.paymentOptions}>
-                        {paymentLoading ? (
-                          <div className={styles.loadingContainer}>
-                            <div className={styles.spinner}></div>
-                            <p>正在创建订单，请稍候...</p>
+                      showQRCode && paymentQRCode ? (
+                        // 显示支付二维码
+                        <div className={styles.qrCodeContainer}>
+                          <div className={styles.qrCodeContent}>
+                            <p className={styles.qrCodeInstruction}>请使用微信扫描下方二维码</p>
+                            <p className={styles.qrCodeTip}>支付完成后，系统将自动处理您的订单</p>
+                            <img
+                              src={paymentQRCode}
+                              alt="支付二维码"
+                              className={styles.qrCodeImage}
+                              onError={(e) => {
+                                console.error('二维码加载失败:', e);
+                                // 如果二维码加载失败，显示错误信息
+                                e.target.style.display = 'none';
+                                const errorDiv = document.createElement('div');
+                                errorDiv.innerHTML = '二维码加载失败，请刷新页面重试';
+                                errorDiv.style.color = 'red';
+                                errorDiv.style.textAlign = 'center';
+                                e.target.parentNode.appendChild(errorDiv);
+                              }}
+                            />
+                            <button
+                              className={styles.backToPaymentButton}
+                              onClick={() => {
+                                setShowQRCode(false);
+                                setPaymentQRCode(null);
+                              }}
+                            >
+                              返回选择套餐
+                            </button>
                           </div>
-                        ) : (
-                          <>
-                            {redemptionOptions.map((option) => (
-                              <div
-                                key={option.id}
-                                className={styles.paymentOption}
-                                onClick={() => !paymentLoading && handlePayment(option)}
-                              >
-                                <div className={styles.paymentOptionPrice}>{option.price}</div>
-                                <p className={styles.paymentOptionDescription}>{option.description}</p>
+                        </div>
+                      ) : (
+                        <div className={styles.paymentOptionsWrapper}>
+                          <div className={`${styles.paymentOptions} ${paymentLoading ? styles.loadingState : ''}`}>
+                            {paymentLoading ? (
+                              <div className={styles.loadingContainer}>
+                                <div className={styles.spinner}></div>
+                                <p>正在创建订单，请稍候...</p>
                               </div>
-                            ))}
-                            <div className={styles.contactSection}>
-                              <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
-                              <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                            ) : (
+                              <>
+                                {redemptionOptions.map((option) => (
+                                  <div
+                                    key={option.id}
+                                    className={styles.paymentOption}
+                                    onClick={() => !paymentLoading && handlePayment(option)}
+                                  >
+                                    <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                    <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                  </div>
+                                ))}
+                                <div className={styles.contactSection}>
+                                  <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
+                                  <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )
                     ) : (
                       <div className={styles.purchaseHistory}>
                         <h4>{texts.paymentTabHistory}</h4>

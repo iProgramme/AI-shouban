@@ -21,10 +21,14 @@ export default async function handler(req, res) {
 
     // Create or get user (for demo, we use a default user)
     // In production, you should get user from session/auth
-    const userId = await createUser('guest@example.com');
+    const actualUserId = await createUser('guest@example.com');
+
+    if (!actualUserId) {
+      return res.status(400).json({ message: '无法创建用户' });
+    }
 
     // Create order in database
-    await createOrder(orderId, userId, amount);
+    await createOrder(orderId, actualUserId, amount);
 
     // Use the current URL as backend URL
     const backendUrl = process.env.NEXT_PUBLIC_APP_URL || 
