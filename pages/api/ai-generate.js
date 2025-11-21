@@ -158,6 +158,10 @@ export default async function handler(req, res) {
       stream: false,
       messages: [
         {
+      "role":"system",
+      "content":{"imageConfig": {"imageSize": "2K"}}
+      },
+        {
           role: "user",
           content: [
             {

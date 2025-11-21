@@ -41,6 +41,10 @@ export default function Home() {
     return [];
   });
 
+  // Gallery Preview 状态
+  const [galleryShowLightbox, setGalleryShowLightbox] = useState(false);
+  const [galleryLightboxImage, setGalleryLightboxImage] = useState('');
+
   // 支付二维码状态
   const [paymentQRCode, setPaymentQRCode] = useState(null);
   const [showQRCode, setShowQRCode] = useState(false);
@@ -579,91 +583,12 @@ export default function Home() {
           <h2 className={styles.sectionTitle}>{texts.galleryPreviewTitle}</h2>
           <p className={styles.sectionDescription}>{texts.galleryPreviewDescription}</p>
         </div>
-        <div className={styles.galleryGrid}>
-          <div className={styles.galleryItem}>
-            <div className={styles.galleryPair}>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage1Input}
-                  alt="Original"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
-              </div>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage1Output}
-                  alt="Generated"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
-              </div>
-            </div>
-          </div>
-          <div className={styles.galleryItem}>
-            <div className={styles.galleryPair}>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage2Input}
-                  alt="Original"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
-              </div>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage2Output}
-                  alt="Generated"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
-              </div>
-            </div>
-          </div>
-          <div className={styles.galleryItem}>
-            <div className={styles.galleryPair}>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage3Input}
-                  alt="Original"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
-              </div>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage3Output}
-                  alt="Generated"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
-              </div>
-            </div>
-          </div>
-          <div className={styles.galleryItem}>
-            <div className={styles.galleryPair}>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage4Input}
-                  alt="Original"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
-              </div>
-              <div className={styles.galleryImageContainer}>
-                <img
-                  src={texts.galleryImage4Output}
-                  alt="Generated"
-                  className={styles.galleryImage}
-                />
-                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.galleryCTA}>
-          <p className={styles.galleryDescription}>更多作品将在后续版本中展示</p>
-        </div>
+        <GalleryPreview
+          galleryShowLightbox={galleryShowLightbox}
+          galleryLightboxImage={galleryLightboxImage}
+          setGalleryShowLightbox={setGalleryShowLightbox}
+          setGalleryLightboxImage={setGalleryLightboxImage}
+        />
       </section>
 
       {/* Generate Section - 根据 APP_TYPE 显示对应组件 */}
@@ -733,4 +658,172 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+// 根据 APP_TYPE 切换的作品展示组件
+function GalleryPreview({
+  galleryShowLightbox,
+  galleryLightboxImage,
+  setGalleryShowLightbox,
+  setGalleryLightboxImage
+}) {
+  const appType = process.env.APP_TYPE || 'default';
+
+  const openLightbox = (imageSrc) => {
+    setGalleryLightboxImage(imageSrc);
+    setGalleryShowLightbox(true);
+  };
+
+  const closeLightbox = () => {
+    setGalleryShowLightbox(false);
+  };
+
+  if (appType === 'default') {
+    // APP_TYPE 为 default 时，显示单图展示组件
+    const defaultImages = [
+      '/default-images/001.jpeg',
+      '/default-images/002.png',
+      '/default-images/003.jpeg',
+      '/default-images/004.jpeg',
+      '/default-images/005.png',
+      '/default-images/006.png',
+      '/default-images/007.jpeg',
+      '/default-images/008.jpeg',
+      '/default-images/009.jpeg',
+      '/default-images/010.jpeg',
+      '/default-images/011.jpeg',
+      '/default-images/012.png',
+      '/default-images/013.jpeg',
+      '/default-images/014.jpeg',
+      '/default-images/015.png',
+      '/default-images/016.png'
+    ];
+
+    return (
+      <div className={styles.galleryGridNew}>
+        {defaultImages.map((image, index) => (
+          <div key={index} className={styles.galleryItemSingle}>
+            <img
+              src={image}
+              alt={`Gallery ${index + 1}`}
+              className={styles.galleryImageSingle}
+              onClick={() => openLightbox(image)}
+            />
+          </div>
+        ))}
+        <div className={styles.galleryCTA}>
+          <p className={styles.galleryDescription}>更多作品将在后续版本中展示</p>
+        </div>
+
+        {/* Lightbox Modal */}
+        {galleryShowLightbox && (
+          <div className={styles.lightboxOverlay} onClick={closeLightbox}>
+            <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
+              <img src={galleryLightboxImage} alt="Enlarged view" className={styles.lightboxImage} />
+              <button className={styles.lightboxClose} onClick={closeLightbox}>×</button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  } else {
+    // APP_TYPE 不为 default 时，显示原有的双图对照组件
+    return (
+      <>
+        <div className={styles.galleryGrid}>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage1Input}
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage1Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage1Output}
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage1Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage2Input}
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage2Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage2Output}
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage2Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage3Input}
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage3Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage3Output}
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage3Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.galleryItem}>
+            <div className={styles.galleryPair}>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage4Input}
+                  alt="Original"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage4Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryOriginal}</p>
+              </div>
+              <div className={styles.galleryImageContainer}>
+                <img
+                  src={texts.galleryImage4Output}
+                  alt="Generated"
+                  className={styles.galleryImage}
+                  onClick={() => openLightbox(texts.galleryImage4Output)}
+                />
+                <p className={styles.galleryImageLabel}>{texts.galleryGenerated}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={styles.galleryCTA}>
+          <p className={styles.galleryDescription}>更多作品将在后续版本中展示</p>
+        </div>
+      </>
+    );
+  }
 }
