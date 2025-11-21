@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import styles from '../styles/Home.module.css';
-import { getLocalizedTexts } from '../utils/texts';
+import getLocalizedTexts from '../utils/texts';
 
 const texts = getLocalizedTexts();
 

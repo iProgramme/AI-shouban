@@ -2,7 +2,7 @@ import { verifyRedemptionCode, useRedemptionCode, saveGeneratedImage, saveGenera
 import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
-import { getLocalizedTexts } from '../../utils/texts.js';
+import getLocalizedTexts from '../../utils/texts.js';
 // Prepare for AI image generation
 const NANO_BANANA_API_KEY = process.env.NANO_BANANA_API_KEY;
 const NANO_BANANA_BASE_URL = process.env.NANO_BANANA_BASE_URL;
