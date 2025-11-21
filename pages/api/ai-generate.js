@@ -45,13 +45,22 @@ export default async function handler(req, res) {
     });
 
     const code = Array.isArray(fields.code) ? fields.code[0] : fields.code;
-    const imageFile = Array.isArray(files.image) ? files.image[0] : files.image;
+    const promptFromFrontend = Array.isArray(fields.prompt) ? fields.prompt[0] : fields.prompt;
+    // 处理单张图片（图生图）或多张图片（图生图支持多图）
+    let imageFiles = files.images || files.image; // 前端可能发送 images（多图）或 image（单图）
+    if (imageFiles && !Array.isArray(imageFiles)) {
+      imageFiles = [imageFiles];
+    }
 
     if (!code) {
       return res.status(400).json({ message: '请提供兑换码' });
     }
 
-    if (!imageFile) {
+    // 检查是否为文生图模式（只有提示词，没有图片）
+    const isTextToImage = promptFromFrontend && (!imageFiles || imageFiles.length === 0);
+
+    // 如果不是文生图模式，且没有图片文件，返回错误
+    if (!isTextToImage && (!imageFiles || imageFiles.length === 0)) {
       return res.status(400).json({ message: '请提供图片文件' });
     }
 
@@ -93,46 +102,59 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: '兑换码使用次数已达上限' });
     }
 
-    // 验證文件大小，不超過5MB
-    const originalFileSize = (await fs.stat(imageFile.filepath)).size;
-    const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    // 处理图片文件（图生图模式）
+    let imageBase64Array = [];
+    let originalPublicPath = `/temp/original_${Date.now()}`; // 虚拟路径
 
-    if (originalFileSize > MAX_SIZE) {
-      return res.status(400).json({
-        message: '图片过大，请确保图片小于5MB后重新上传。当前文件大小: ' + (originalFileSize / (1024 * 1024)).toFixed(2) + 'MB',
-        fileSize: originalFileSize,
-        maxSize: MAX_SIZE
-      });
+    if (imageFiles && imageFiles.length > 0) {
+      // 验证文件大小，不超过5MB
+      for (const imageFile of imageFiles) {
+        const originalFileSize = (await fs.stat(imageFile.filepath)).size;
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
+        if (originalFileSize > MAX_SIZE) {
+          return res.status(400).json({
+            message: '图片过大，请确保图片小于5MB后重新上传。当前文件大小: ' + (originalFileSize / (1024 * 1024)).toFixed(2) + 'MB',
+            fileSize: originalFileSize,
+            maxSize: MAX_SIZE
+          });
+        }
+
+        // 直接读取图片内容并转换为base64，不保存到服务器
+        const imageBuffer = await fs.readFile(imageFile.filepath);
+        const fileExtension = path.extname(imageFile.originalFilename);
+        const imageBase64 = imageBuffer.toString('base64');
+        imageBase64Array.push({
+          base64: imageBase64,
+          extension: fileExtension.replace('.', '')
+        });
+      }
     }
-
-    // 直接讀取圖片內容而不保存到服務器
-    const fileExtension = path.extname(imageFile.originalFilename);
-    const timestamp = Date.now();
-    const originalPublicPath = `/temp/original_${timestamp}`; // 虛擬路徑，實際不保存
-
 
     if (!NANO_BANANA_API_KEY) {
       return res.status(500).json({ message: 'API密钥未配置' });
     }
 
-    // Get image as base64 for prompt (directly from uploaded file)
-    const imageBuffer = await fs.readFile(imageFile.filepath);
-    const imageBase64 = imageBuffer.toString('base64');
+    // 根据环境变量和前端传入的提示词确定实际的提示词
+    const appType = process.env.APP_TYPE || 'default';
+    let prompt;
 
-    // Create a prompt using the image
-
-    // 动态导入 texts 模块
-    const selectedTexts = getLocalizedTexts();
-    console.log("selectedTexts:", JSON.stringify(selectedTexts.imageGenerationPrompt));
-
-    const prompt = selectedTexts.imageGenerationPrompt;
+    if (appType === 'default' && promptFromFrontend) {
+      // 当APP_TYPE为default时，使用前端传入的提示词
+      prompt = promptFromFrontend;
+    } else {
+      // 否则使用预设的提示词
+      const selectedTexts = getLocalizedTexts();
+      prompt = selectedTexts.imageGenerationPrompt;
+    }
 
     if (!prompt) {
       return res.status(500).json({ message: '未配置图片生成提示' });
     }
 
+    // 构建请求负载
     const requestPayload = {
-      model: process.env.MODEL_NAME || "gemini-2.5-flash-image-preview", // 使用Gemini模型
+      model: process.env.MODEL_NAME || "gemini-3-pro-image-preview", // 使用Gemini模型
       stream: false,
       messages: [
         {
@@ -141,16 +163,22 @@ export default async function handler(req, res) {
             {
               type: "text",
               text: prompt
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/${fileExtension.replace('.', '')};base64,${imageBase64}`
-              }
             }
           ]
         }
       ]
+    };
+
+    // 如果是图生图模式，添加图片到内容中
+    if (!isTextToImage && imageBase64Array.length > 0) {
+      for (const imgData of imageBase64Array) {
+        requestPayload.messages[0].content.push({
+          type: "image_url",
+          image_url: {
+            url: `data:image/${imgData.extension};base64,${imgData.base64}`
+          }
+        });
+      }
     };
 
     const requestHeaders = {
@@ -175,7 +203,7 @@ export default async function handler(req, res) {
       );
 
       // mock数据
-      // const response = {data:{"id":"chatcmpl-o7iplpqH5znTkhVkNlzQzVeON7pcB5","object":"chat.completion","created":1763631761,"model":"gemini-2.5-flash-image-preview","choices":[{"index":0,"message":{"role":"assistant","content":"![image](https://cloudflarer2.nananobanana.com/png/1763631761164_984.png)","reasoning_content":null},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":2351,"completion_tokens":1290,"total_tokens":3641}}}
+      // const response = {data:{"id":"chatcmpl-o7iplpqH5znTkhVkNlzQzVeON7pcB5","object":"chat.completion","created":1763631761,"model":"gemini-3-pro-image-preview","choices":[{"index":0,"message":{"role":"assistant","content":"![image](https://cloudflarer2.nananobanana.com/png/1763631761164_984.png)","reasoning_content":null},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":2351,"completion_tokens":1290,"total_tokens":3641}}}
 
       // 检查API响应是否包含错误
       if (response.data.error) {
@@ -296,6 +324,15 @@ export default async function handler(req, res) {
       );
     } catch (dbError) {
       console.error('保存失败结果到数据库错误:', dbError);
+    }
+
+    // 如果verificationResult未定义，则说明错误发生在验证阶段
+    if (!verificationResult) {
+      // 如果是验证阶段的错误，直接返回错误信息
+      return res.status(500).json({
+        message: '兑换码验证失败',
+        error: error.message
+      });
     }
 
     // 如果是API调用错误或其他导致图片未成功生成的错误，

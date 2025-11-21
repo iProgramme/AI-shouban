@@ -55,7 +55,7 @@ const shoubanTexts = {
   codeSectionTitle: '兑换码',
   codePlaceholder: '请输入兑换码',
   buyCode: '购买兑换码',
-  generateButton: '生成手办',
+  generateButton: '生成精美图像',
   generateProcessing: '生成中...',
   resultSectionTitle: '生成结果',
   downloadHint: '右键点击或长按图片可下载',

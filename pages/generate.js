@@ -250,7 +250,7 @@ export default function Generate() {
               disabled={isProcessing || !image || !code}
               className={`${styles.generateButton} ${(!image || !code) ? styles.disabled : ''}`}
             >
-              {isProcessing ? '生成中...' : '生成手办'}
+              {isProcessing ? '生成中...' : '生成精美图像'}
             </button>
 
             {error && <p className={styles.error}>{error}</p>}

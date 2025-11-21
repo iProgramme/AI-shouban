@@ -1,7 +1,7 @@
 const nanoBananaProTexts = {
   // 页面标题和描述
-  pageTitle: 'AI手办生成 - 专业的AI手办图像生成服务',
-  pageDescription: '使用AI技术将您的照片转换为精美的手办图像，简单快捷，效果惊艳',
+  pageTitle: 'nano-banana-pro - 专业的AI香蕉图像生成服务',
+  pageDescription: '使用AI技术将您的照片转换为精美的nano-banana-pro图像，简单快捷，效果惊艳',
 
   // 导航栏
   navHome: '首页',
@@ -10,8 +10,8 @@ const nanoBananaProTexts = {
 
   // 首页头部区域
   heroTitle1: '将您的照片',
-  heroTitle2: '转换为精美手办',
-  heroDescription: '使用先进的AI技术，只需上传一张照片，即可生成专业级手办图像。\\n简单、快速、效果惊艳',
+  heroTitle2: '转换为精美nano-banana-pro',
+  heroDescription: '使用先进的AI技术，只需上传一张照片，即可生成专业级nano-banana-pro图像。\\n简单、快速、效果惊艳',
   heroCtaPrimary: '立即开始生成',
   heroCtaSecondary: '查看作品展示',
 
@@ -21,11 +21,11 @@ const nanoBananaProTexts = {
   feature1Title: '快速生成',
   feature1Desc: '先进的AI算法，数秒内完成图像生成，无需等待',
   feature2Title: '专业品质',
-  feature2Desc: '高质量的手办风格转换，细节丰富，效果惊艳',
+  feature2Desc: '高质量的nano-banana-pro风格转换，细节丰富，效果惊艳',
   feature3Title: '安全可靠',
   feature3Desc: '您的隐私和数据安全是我们的首要考虑',
   feature4Title: '价格实惠',
-  feature4Desc: '合理的价格，让每个人都能享受AI手办生成服务',
+  feature4Desc: '合理的价格，让每个人都能享受AI nano-banana-pro生成服务',
 
   // 如何使用
   howItWorksTitle: '如何使用',
@@ -34,8 +34,8 @@ const nanoBananaProTexts = {
   step1Desc: '选择您想要转换的照片，支持JPG、PNG格式',
   step2: '输入兑换码',
   step2Desc: '使用兑换码解锁生成功能，或购买新的兑换码',
-  step3: '获得手办',
-  step3Desc: 'AI自动处理，生成精美的手办风格图像',
+  step3: '获得nano-banana-pro',
+  step3Desc: 'AI自动处理，生成精美的nano-banana-pro风格图像',
 
   // 画廊预览
   galleryPreviewTitle: '作品展示',
@@ -45,8 +45,8 @@ const nanoBananaProTexts = {
   galleryCtaDescription: '更多作品将在后续版本中展示',
 
   // 生成部分
-  generateSectionTitle: '开始生成您的手办',
-  generateSectionDescription: '上传图片并输入兑换码，即可生成专属手办',
+  generateSectionTitle: '开始生成您的nano-banana-pro',
+  generateSectionDescription: '上传图片并输入兑换码，即可生成专属nano-banana-pro',
   uploadSectionTitle: '上传图片',
   hintUpload: '支持 JPG、PNG 格式，最大 5MB',
   selectImage: '选择图片',
@@ -55,7 +55,7 @@ const nanoBananaProTexts = {
   codeSectionTitle: '兑换码',
   codePlaceholder: '请输入兑换码',
   buyCode: '购买兑换码',
-  generateButton: '生成手办',
+  generateButton: '生成精美图像',
   generateProcessing: '生成中...',
   resultSectionTitle: '生成结果',
   downloadHint: '右键点击或长按图片可下载',
@@ -118,21 +118,21 @@ const nanoBananaProTexts = {
   faq1Question: '如何购买兑换码？',
   faq1Answer: '您可以在首页点击购买兑换码，选择合适的套餐进行购买。我们提供多种套餐以满足不同需求。',
   faq2Question: '生成时间需要多久？',
-  faq2Answer: '通常在提交图片后，AI会在数秒内完成手办生成。处理时间也取决于当前服务器负载情况。',
+  faq2Answer: '通常在提交图片后，AI会在数秒内完成nano-banana-pro生成。处理时间也取决于当前服务器负载情况。',
   faq3Question: '支持哪些图片格式？',
   faq3Answer: '目前支持JPG、PNG格式的图片，大小不超过5MB。建议使用正面清晰的人像图片以获得最佳效果。',
   faq4Question: '批量购买有什么优惠？',
   faq4Answer: '20张以上可联系我们获取批量优惠价格。我们为商业用户和大量需求用户提供定制化方案。',
 
   // 页脚
-  footerDescription: '专业的AI手办图像生成服务，让您的照片焕发新的生命力',
+  footerDescription: '专业的AI nano-banana-pro图像生成服务，让您的照片焕发新的生命力',
   footerQuickLinks: '快速链接',
   footerLegalInfo: '法律信息',
   footerContact: '联系方式',
-  footerCopyRight: '© 2024 AI手办生成. 保留所有权利.',
+  footerCopyRight: '© 2024 nano-banana-pro. 保留所有权利.',
 
   // 联系页面
-  contactPageTitle: '联系我们 - AI手办生成',
+  contactPageTitle: '联系我们 - nano-banana-pro',
   contactPageDescription: '联系我们获取支持',
   contactTitle: '联系我们',
   contactSubtitle: '有任何问题？我们随时为您提供帮助',
@@ -143,14 +143,14 @@ const nanoBananaProTexts = {
   contactEmailLink: 'xiongkousuidashi@vip.qq.com',
 
   // 隐私政策和条款页面
-  privacyPageTitle: '隐私政策 - AI手办生成',
+  privacyPageTitle: '隐私政策 - nano-banana-pro',
   privacyPageDescription: '隐私政策',
   privacyTitle: '隐私政策',
   privacySection1Title: '1. 信息收集',
-  privacySection1Content: '我们收集您上传的图片、兑换码使用记录以及必要的联系信息，用于提供AI手办生成服务。具体包括：',
+  privacySection1Content: '我们收集您上传的图片、兑换码使用记录以及必要的联系信息，用于提供AI nano-banana-pro生成服务。具体包括：',
   privacySection1List: [
     '账户信息：当您注册账户时，我们会收集您的邮箱地址等基本信息',
-    '上传内容：您上传的图片将用于AI处理，生成相应的手办风格图像',
+    '上传内容：您上传的图片将用于AI处理，生成相应的nano-banana-pro风格图像',
     '设备信息：我们可能会收集您的设备型号、操作系统版本、浏览器类型等信息',
     '使用数据：包括您使用服务的时间、频率、兑换码使用情况等',
     '日志信息：包括IP地址、访问时间、浏览器类型等'
@@ -196,11 +196,11 @@ const nanoBananaProTexts = {
   privacySection10Title: '10. 联系我们',
   privacySection10Content: '如果您对本隐私政策有任何疑问，请通过以下方式联系我们：',
 
-  termsPageTitle: '服务条款 - AI手办生成',
+  termsPageTitle: '服务条款 - nano-banana-pro',
   termsPageDescription: '服务条款',
   termsTitle: '服务条款',
   termsSection1Title: '1. 服务说明',
-  termsSection1Content: '本服务提供AI手办图像生成功能，用户上传图片后，系统将生成对应的个性化手办风格图像。我们努力提供准确、高质量的服务，但生成结果可能存在差异。',
+  termsSection1Content: '本服务提供AI nano-banana-pro图像生成功能，用户上传图片后，系统将生成对应的个性化nano-banana-pro风格图像。我们努力提供准确、高质量的服务，但生成结果可能存在差异。',
   termsSection2Title: '2. 用户责任',
   termsSection2Content: '用户在使用本服务时，应确保：',
   termsSection2List: [
@@ -280,9 +280,9 @@ const nanoBananaProTexts = {
   heroImage: '/images/hero.png',
 
   // 生成提示词
-  imageGenerationPrompt: '请将这张人物照片转换为精美的手办风格图像。请保持原始人物的特征，但以手办材质和风格呈现。',
+  imageGenerationPrompt: '请将这张人物照片转换为精美的nano-banana-pro风格图像。请保持原始人物的特征，但以nano-banana-pro材质和风格呈现。',
 
   // 其他
-  logoText: 'AI手办生成'
+  logoText: 'nano-banana-pro'
 };
 export default nanoBananaProTexts;

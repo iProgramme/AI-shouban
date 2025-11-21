@@ -570,6 +570,12 @@
   transform: scale(1.02);
 }
 
+.imageCount {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
 .placeholder {
   margin-bottom: 1.5rem;
 }
@@ -591,22 +597,21 @@
 
 .uploadButton {
   display: inline-block;
-  padding: 0.875rem 2.5rem;
+  padding: 0.5rem 1.5rem;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  border-radius: calc(var(--radius) * 2);
+  border-radius: calc(var(--radius) * 1);
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  font-size: 1rem;
-  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
   border: none;
+  margin-bottom: 0.5rem;
 }
 
 .uploadButton:hover {
   background: hsl(var(--primary) / 0.9);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .changeImageButton {
@@ -1266,7 +1271,6 @@
   max-width: 100%;
   max-height: 300px;
   border-radius: calc(var(--radius) * 2);
-  margin-bottom: 1.5rem;
   box-shadow: var(--shadow-lg);
   border: 2px solid hsl(var(--border));
   object-fit: contain;
@@ -1835,6 +1839,19 @@
   line-height: 1.5;
 }
 
+.qrCodeWarning {
+  color: hsl(var(--destructive));
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0.5rem 0;
+  line-height: 1.5;
+  font-weight: 500;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  padding: 0.5rem;
+  border-radius: calc(var(--radius) * 1);
+  background: hsl(var(--destructive) / 0.1);
+}
+
 .backToPaymentButton {
   margin-top: 1rem;
   padding: 0.5rem 1.5rem;
@@ -1857,6 +1874,190 @@
 /* 测试按钮样式 - 保持与普通支付选项相同的基础样式，但背景不同 */
 .paymentOptions .paymentOption[style*="linear-gradient"] {
   background: linear-gradient(45deg, #ff6b6b, #ffa500) !important;
+}
+
+/* 文生图/图生图 Tab 样式 */
+.tabContainer {
+  display: flex;
+  background: transparent;
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 1.5rem;
+  padding: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.75rem 0;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  position: relative;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: hsl(var(--foreground));
+}
+
+.tab.activeTab {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.tab.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: hsl(var(--primary));
+}
+
+.textToImageSection {
+  margin-bottom: 2rem;
+}
+
+.promptInput {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid hsl(var(--input));
+  border-radius: calc(var(--radius) * 2);
+  font-size: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  resize: vertical;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.promptInput:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.imageToImageSection {
+  margin-bottom: 2rem;
+}
+
+.multiImageUpload {
+  width: 100%;
+}
+
+.previewsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: hsl(var(--muted) / 0.2);
+  border-radius: calc(var(--radius) * 2);
+  border: 1px solid hsl(var(--border));
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.previewItem {
+  position: relative;
+  aspect-ratio: 1/1;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  overflow: hidden;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.previewItem:hover {
+  border-color: hsl(var(--primary));
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.previewItem img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.uploadPlaceholder {
+  border: 1px dashed hsl(var(--border));
+  background: hsl(var(--muted) / 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploadPlaceholder:hover {
+  border: 1px dashed hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.uploadLabel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: hsl(var(--muted-foreground));
+  gap: 0.25rem;
+}
+
+.uploadIcon {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.uploadText {
+  font-size: 0.75rem;
+}
+
+.removeButton {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(var(--destructive));
+  color: white;
+  border: 2px solid hsl(var(--card));
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.removeButton:hover {
+  transform: scale(1.1);
+  background: white;
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive));
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+
+.imageCount {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
 

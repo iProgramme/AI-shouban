@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import styles from '../styles/Home.module.css';
 import getLocalizedTexts from '../utils/texts';
+import GenerateSection from '../components/GenerateSection';
 
 const texts = getLocalizedTexts();
 
@@ -424,7 +425,7 @@ export default function Home() {
       formData.append('image', image);
       formData.append('code', code);
 
-      // 调用后端 AI API 生成手办图像
+      // 调用后端 AI API 生成nano-banana-pro图像
       const response = await fetch('/api/ai-generate', {
         method: 'POST',
         body: formData,
@@ -490,10 +491,10 @@ export default function Home() {
           <h1 className={styles.heroTitle}>
             将您的照片
             <br />
-            <span className={styles.heroTitleHighlight}>转换为精美手办</span>
+            <span className={styles.heroTitleHighlight}>转换为精美nano-banana-pro</span>
           </h1>
           <p className={styles.heroDescription}>
-            使用先进的AI技术，只需上传一张照片，即可生成专业级手办图像。
+            使用先进的AI技术，只需上传一张照片，即可生成专业级nano-banana-pro图像。
             <br />
             简单、快速、效果惊艳
           </p>
@@ -665,294 +666,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Generate Section */}
-      <section className={styles.generateSection}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>{texts.generateSectionTitle}</h2>
-          <p className={styles.sectionDescription}>{texts.generateSectionDescription}</p>
-        </div>
-
-        <div className={styles.generateContainer}>
-          <div className={styles.leftSection}>
-            <div className={styles.uploadSection}>
-              <h3>{texts.uploadSectionTitle}</h3>
-              <div
-                className={`${styles.uploadArea} ${isDragActive ? styles.dragActive : ''}`}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                {preview ? (
-                  <>
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className={styles.previewImage}
-                      onClick={() => {
-                        // 重置图片选择
-                        const fileInput = document.getElementById('homeImageUpload');
-                        if (fileInput) fileInput.value = '';
-                        setPreview(null);
-                        setImage(null);
-                      }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className={styles.placeholder}>
-                      <p>{texts.dragUpload}</p>
-                      <p className={styles.hint}>{texts.hintUpload}</p>
-                    </div>
-                    <input
-                      type="file"
-                      id="homeImageUpload"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className={styles.fileInput}
-                    />
-                    <label htmlFor="homeImageUpload" className={styles.uploadButton}>
-                      {texts.selectImage}
-                    </label>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className={styles.codeSection}>
-              <h3>{texts.codeSectionTitle}</h3>
-              <div className={styles.codeInputContainer}>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder={texts.codePlaceholder}
-                  className={styles.codeInput}
-                />
-              </div>
-
-              <button
-                onClick={() => setShowPayment(!showPayment)}
-                className={styles.buyButton}
-              >
-                {texts.buyCode}
-              </button>
-
-              {showPayment && (
-                <div className={styles.paymentModal} onClick={() => setShowPayment(false)}>
-                  <div className={styles.paymentContent} onClick={(e) => e.stopPropagation()}>
-                    <div className={styles.paymentHeader}>
-                      <h3>{texts.paymentModalTitle}</h3>
-                      <div className={styles.paymentTabs}>
-                        <button
-                          className={`${styles.paymentTab} ${!showHistory ? styles.activeTab : ''}`}
-                          onClick={() => setShowHistory(false)}
-                        >
-                          {texts.paymentTabBuy}
-                        </button>
-                        <button
-                          className={`${styles.paymentTab} ${showHistory ? styles.activeTab : ''}`}
-                          onClick={() => setShowHistory(true)}
-                        >
-                          {texts.paymentTabHistory}
-                        </button>
-                      </div>
-                    </div>
-
-                    {!showHistory ? (
-                      showQRCode && paymentQRCode ? (
-                        // 显示支付二维码
-                        <div className={styles.qrCodeContainer}>
-                          <div className={styles.qrCodeContent}>
-                            <p className={styles.qrCodeInstruction}>请使用微信扫描下方二维码</p>
-                            <p className={styles.qrCodeTip}>支付完成后，系统将自动处理您的订单</p>
-                            <img
-                              src={paymentQRCode}
-                              alt="支付二维码"
-                              className={styles.qrCodeImage}
-                              onError={(e) => {
-                                console.error('二维码加载失败:', e);
-                                // 如果二维码加载失败，显示错误信息
-                                e.target.style.display = 'none';
-                                const errorDiv = document.createElement('div');
-                                errorDiv.innerHTML = '二维码加载失败，请刷新页面重试';
-                                errorDiv.style.color = 'red';
-                                errorDiv.style.textAlign = 'center';
-                                e.target.parentNode.appendChild(errorDiv);
-                              }}
-                            />
-                            <button
-                              className={styles.backToPaymentButton}
-                              onClick={() => {
-                                setShowQRCode(false);
-                                setPaymentQRCode(null);
-                              }}
-                            >
-                              返回选择套餐
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={styles.paymentOptionsWrapper}>
-                          <div className={`${styles.paymentOptions} ${paymentLoading ? styles.loadingState : ''}`}>
-                            {paymentLoading ? (
-                              <div className={styles.loadingContainer}>
-                                <div className={styles.spinner}></div>
-                                <p>正在创建订单，请稍候...</p>
-                              </div>
-                            ) : (
-                              <>
-                                {redemptionOptions.map((option) => {
-                                  // 只渲染非隐藏的选项
-                                  if (option.hidden) return null;
-
-                                  return (
-                                    <div
-                                      key={option.id}
-                                      className={styles.paymentOption}
-                                      onClick={() => !paymentLoading && handlePayment(option)}
-                                    >
-                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
-                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
-                                    </div>
-                                  );
-                                })}
-                                {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
-                                {showTestOption && (
-                                  <div
-                                    className={styles.paymentOption}
-                                    onClick={() => !paymentLoading && handleTestPayment()}
-                                    style={{
-                                      background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    <div className={styles.paymentOptionPrice}>0.01元测试</div>
-                                    <p className={styles.paymentOptionDescription}>系统测试套餐</p>
-                                  </div>
-                                )}
-
-                                <div className={styles.contactSection}>
-                                  <p className={styles.contactQuestion}>{texts.contactQuestion}</p>
-                                  <a href="/contact" className={styles.contactLink} onClick={() => setShowPayment(false)}>{texts.contactLink}</a>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    ) : (
-                      <div className={styles.purchaseHistory}>
-                        <h4>{texts.paymentTabHistory}</h4>
-                        {purchaseHistory.length > 0 ? (
-                          <div className={styles.historyTable}>
-                            <table>
-                              <thead>
-                                <tr>
-                                  <th>兑换码</th>
-                                  <th>类型</th>
-                                  <th>购买时间</th>
-                                  <th>操作</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {purchaseHistory.map((record) => (
-                                  <tr key={record.id}>
-                                    <td className={styles.codeCell}>{record.code}</td>
-                                    <td>{record.type}</td>
-                                    <td>{record.timestamp}</td>
-                                    <td>
-                                      <button
-                                        className={styles.copyButton}
-                                        onClick={() => copyToClipboard(record.code)}
-                                      >
-                                        {texts.copyButton}
-                                      </button>
-                                      <button
-                                        className={styles.useButton}
-                                        onClick={() => {
-                                          setCode(record.code);
-                                          setShowPayment(false);
-                                        }}
-                                      >
-                                        {texts.useButton}
-                                      </button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <p className={styles.noHistory}>{texts.noPurchaseHistory}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={handleGenerate}
-                disabled={isProcessing || !image || !code}
-                className={`${styles.generateButton} ${(!image || !code) ? styles.disabled : ''}`}
-              >
-                {isProcessing ? texts.generateProcessing : texts.generateButton}
-              </button>
-
-              {processingTime && (
-                <p className={styles.processingTime}>{texts.processingTime}{processingTime}{texts.seconds}</p>
-              )}
-              <p className={styles.downloadWarning}>{texts.downloadWarning}</p>
-
-              {error && <div className={styles.error}>{error}</div>}
-            </div>
-          </div>
-
-          <div className={styles.rightSection}>
-            {generatedImage && (
-              <div className={styles.resultSection}>
-                <h3>{texts.resultSectionTitle}</h3>
-                <div className={styles.resultImages}>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src={generatedImage}
-                      alt="Generated Hand Figurine"
-                      className={styles.resultImage}
-                    />
-                    <p className={styles.downloadHint}>{texts.downloadHint}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 历史记录部分 */}
-            <div className={styles.historySection}>
-              <h3>{texts.historySectionTitle}</h3>
-              <div className={styles.historyContainer}>
-                {isClient && generatedHistory.length > 0 ? (
-                  <div className={styles.historyList}>
-                    {generatedHistory.map((item, index) => (
-                      <div key={item.id} className={styles.historyItem}>
-                        <img
-                          src={item.imageUrl}
-                          alt="Generated History"
-                          className={styles.historyImage}
-                        />
-                        <p className={styles.historyDate}>{item.date}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : isClient ? (
-                  <p className={styles.noHistory}>{texts.noHistory}</p>
-                ) : (
-                  <p className={styles.noHistory}>&nbsp;</p> // 占位符以防止布局跳动
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Generate Section - 根据 APP_TYPE 显示对应组件 */}
+      <GenerateSection />
 
       {/* FAQ Section */}
       <section className={styles.faqSection}>
