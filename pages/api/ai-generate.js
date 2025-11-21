@@ -24,15 +24,14 @@ export default async function handler(req, res) {
     // Import formidable within the handler function for server-side compatibility
     const formidable = (await import('formidable')).default;
 
-    // Parse the form data
+    // 解析表单数据 - 设置为最小化磁盘使用
     const form = formidable({
-      maxFileSize: 5 * 1024 * 1024, // 5MB limit
-      uploadDir: path.join(process.cwd(), 'public/uploads'),
-      keepExtensions: true
+      maxFileSize: 5 * 1024 * 1024, // 5MB 限制
+      keepExtensions: true,
+      multiples: true, // 允许多文件上传
+      allowEmptyFiles: false,
+      minFileSize: 1,
     });
-
-    // Ensure upload directory exists
-    await fs.mkdir(form.uploadDir, { recursive: true });
 
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
@@ -109,7 +108,19 @@ export default async function handler(req, res) {
     if (imageFiles && imageFiles.length > 0) {
       // 验证文件大小，不超过5MB
       for (const imageFile of imageFiles) {
-        const originalFileSize = (await fs.stat(imageFile.filepath)).size;
+        // 获取文件大小（获取buffer的大小）
+        let originalFileSize;
+        if (Buffer.isBuffer(imageFile)) {
+          originalFileSize = imageFile.length;
+        } else if (imageFile.buffer) {
+          originalFileSize = imageFile.buffer.length;
+        } else if (imageFile.size) {
+          originalFileSize = imageFile.size;
+        } else {
+          // 最后尝试从filepath获取文件大小（理论上不应该执行到这里）
+          originalFileSize = (await fs.stat(imageFile.filepath)).size;
+        }
+
         const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
         if (originalFileSize > MAX_SIZE) {
@@ -120,14 +131,21 @@ export default async function handler(req, res) {
           });
         }
 
-        // 直接读取图片内容并转换为base64，不保存到服务器
+        // 从临时文件路径读取文件内容
         const imageBuffer = await fs.readFile(imageFile.filepath);
-        const fileExtension = path.extname(imageFile.originalFilename);
+        const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '');
         const imageBase64 = imageBuffer.toString('base64');
         imageBase64Array.push({
           base64: imageBase64,
           extension: fileExtension.replace('.', '')
         });
+
+        // 删除临时文件以避免留下垃圾文件
+        try {
+          await fs.unlink(imageFile.filepath);
+        } catch (unlinkErr) {
+          console.error('删除临时文件失败:', unlinkErr);
+        }
       }
     }
 
@@ -176,7 +194,7 @@ export default async function handler(req, res) {
     // 如果是图生图模式，添加图片到内容中
     if (!isTextToImage && imageBase64Array.length > 0) {
       for (const imgData of imageBase64Array) {
-        requestPayload.messages[0].content.push({
+        requestPayload.messages[1].content.push({
           type: "image_url",
           image_url: {
             url: `data:image/${imgData.extension};base64,${imgData.base64}`
@@ -328,15 +346,6 @@ export default async function handler(req, res) {
       );
     } catch (dbError) {
       console.error('保存失败结果到数据库错误:', dbError);
-    }
-
-    // 如果verificationResult未定义，则说明错误发生在验证阶段
-    if (!verificationResult) {
-      // 如果是验证阶段的错误，直接返回错误信息
-      return res.status(500).json({
-        message: '兑换码验证失败',
-        error: error.message
-      });
     }
 
     // 如果是API调用错误或其他导致图片未成功生成的错误，
