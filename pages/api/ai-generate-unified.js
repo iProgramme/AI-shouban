@@ -1,6 +1,5 @@
 import { verifyRedemptionCode, useRedemptionCode, saveGeneratedImage, saveGenerationResult } from '../../utils/db';
-import { generateImage } from '../../utils/imageGeneration';
-import { generateImageV2 } from '../../utils/imageGenerationV2';
+import { generateImageWithStrategy, getCurrentStrategy } from '../../utils/imageGenerationStrategy';
 
 export const config = {
   api: {

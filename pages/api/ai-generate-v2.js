@@ -1,5 +1,4 @@
 import { verifyRedemptionCode, useRedemptionCode, saveGeneratedImage, saveGenerationResult } from '../../utils/db';
-import { generateImage } from '../../utils/imageGeneration';
 import { generateImageV2 } from '../../utils/imageGenerationV2';
 
 export const config = {
@@ -40,6 +39,8 @@ export default async function handler(req, res) {
 
     const code = Array.isArray(fields.code) ? fields.code[0] : fields.code;
     const promptFromFrontend = Array.isArray(fields.prompt) ? fields.prompt[0] : fields.prompt;
+    const aspectRatio = Array.isArray(fields.aspectRatio) ? fields.aspectRatio[0] : fields.aspectRatio || "1:1";
+    const resolution = Array.isArray(fields.resolution) ? fields.resolution[0] : fields.resolution || "2K";
     // 处理单张图片（图生图）或多张图片（图生图支持多图）
     let imageFiles = files.images || files.image; // 前端可能发送 images（多图）或 image（单图）
     if (imageFiles && !Array.isArray(imageFiles)) {
@@ -96,31 +97,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: '兑换码使用次数已达上限' });
     }
 
-    // 根据API_SOURCE环境变量选择生成函数
-    const apiSource = process.env.API_SOURCE || 'API_TANGGUO'; // 默认使用糖果姐姐API
-
-    let result;
-    if (apiSource === 'API_YI') {
-      // 使用api易的生成函数
-      result = await generateImageV2({
-        imageFiles,
-        code,
-        promptFromFrontend,
-        verificationResult,
-        aspectRatio: "1:1", // 默认纵横比
-        resolution: "2K"    // 默认分辨率
-      });
-    } else {
-      // 使用糖果姐姐的原始生成函数
-      result = await generateImage({
-        imageFiles,
-        code,
-        promptFromFrontend,
-        verificationResult
-      });
-    }
-
-    const { generatedPublicPath, originalPublicPath } = result;
+    // 调用新的图片生成函数 (V2)
+    const { generatedPublicPath, originalPublicPath } = await generateImageV2({
+      imageFiles,
+      code,
+      promptFromFrontend,
+      verificationResult,
+      aspectRatio,
+      resolution
+    });
 
     // 只有在圖片生成成功後才標記兌換碼為已使用
     await useRedemptionCode(verificationResult.id);
@@ -137,8 +122,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       message: '图片生成成功',
       generatedImageUrl: generatedPublicPath,
-      originalImageUrl: originalPublicPath, // 虚拟路径
-      apiSourceUsed: apiSource // 返回使用的API厂商
+      originalImageUrl: originalPublicPath // 虚拟路径
     });
   } catch (error) {
     console.error('AI图片生成错误:', error);
