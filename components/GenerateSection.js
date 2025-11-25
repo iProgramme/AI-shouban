@@ -768,7 +768,7 @@ const OriginalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>2K (1.5积分)</span>
+                  <span className={styles.resolutionText}>2K (2积分)</span>
                 </label>
                 <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
@@ -779,7 +779,7 @@ const OriginalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>4K (2积分)</span>
+                  <span className={styles.resolutionText}>4K (3积分)</span>
                 </label>
               </div>
             </div>
@@ -1704,7 +1704,7 @@ const MultiModalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>2K (1.5积分)</span>
+                  <span className={styles.resolutionText}>2K (2积分)</span>
                 </label>
                 <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
@@ -1715,7 +1715,7 @@ const MultiModalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>4K (2积分)</span>
+                  <span className={styles.resolutionText}>4K (3积分)</span>
                 </label>
               </div>
             </div>

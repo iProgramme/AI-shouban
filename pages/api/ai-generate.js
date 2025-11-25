@@ -189,8 +189,12 @@ export default async function handler(req, res) {
 
     const { generatedPublicPath, originalPublicPath } = result;
 
-    // 只有在圖片生成成功後才標記兌換碼為已使用
-    await useRedemptionCode(verificationResult.id);
+    // 注意：在API_YI情况下，已经根据分辨率扣除了相应积分
+    // 在糖果姐姐API情况下，已经在前面扣除了1次积分
+    if (apiSource !== 'API_YI') {
+      // 只有在非API_YI情况下才再次扣除1次（保持原有糖果姐姐API的行为）
+      await useRedemptionCode(verificationResult.id);
+    }
 
     // 保存成功的生成結果
     await saveGenerationResult(
