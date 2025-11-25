@@ -669,6 +669,9 @@ function GalleryPreview({
 }) {
   const appType = process.env.APP_TYPE || 'default';
 
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const openLightbox = (imageSrc) => {
     setGalleryLightboxImage(imageSrc);
     setGalleryShowLightbox(true);
@@ -678,42 +681,70 @@ function GalleryPreview({
     setGalleryShowLightbox(false);
   };
 
-  if (appType === 'default') {
-    // APP_TYPE 为 default 时，显示单图展示组件
-    const defaultImages = [
-      '/default-images/001.jpeg',
-      '/default-images/002.png',
-      '/default-images/003.jpeg',
-      '/default-images/004.jpeg',
-      '/default-images/005.png',
-      '/default-images/006.png',
-      '/default-images/007.jpeg',
-      '/default-images/008.jpeg',
-      '/default-images/009.jpeg',
-      '/default-images/010.jpeg',
-      '/default-images/011.jpeg',
-      '/default-images/012.png',
-      '/default-images/013.jpeg',
-      '/default-images/014.jpeg',
-      '/default-images/015.png',
-      '/default-images/016.png'
-    ];
+  // 加载画廊图片的函数
+  const loadGalleryImages = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/gallery-latest');
+      const data = await response.json();
+      if (data.success) {
+        setGalleryItems(data.data);
+      }
+    } catch (error) {
+      console.error('加载画廊图片失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // 组件挂载时加载图片
+  useEffect(() => {
+    loadGalleryImages();
+
+    // 设置定时器，每30秒更新一次
+    const interval = setInterval(loadGalleryImages, 30000);
+
+    // 清理定时器
+    return () => clearInterval(interval);
+  }, []);
+
+  if (appType === 'default') {
+    // APP_TYPE 为 default 时，显示最新的生成图片
     return (
       <div className={styles.galleryGridNew}>
-        {defaultImages.map((image, index) => (
-          <div key={index} className={styles.galleryItemSingle}>
-            <img
-              src={image}
-              alt={`Gallery ${index + 1}`}
-              className={styles.galleryImageSingle}
-              onClick={() => openLightbox(image)}
-            />
+        {loading ? (
+          <div className={styles.galleryLoading}>
+            <p>正在加载最新作品...</p>
           </div>
-        ))}
-        <div className={styles.galleryCTA}>
-          <p className={styles.galleryDescription}>更多作品将在后续版本中展示</p>
-        </div>
+        ) : galleryItems.length > 0 ? (
+          <>
+            {galleryItems.slice(0, 16).map((item, index) => (
+              <div key={`${item.id}-${index}`} className={styles.galleryItemSingle}>
+                <img
+                  src={item.generated_image_url}
+                  alt={`Generated artwork ${index + 1}`}
+                  className={styles.galleryImageSingle}
+                  onClick={() => openLightbox(item.generated_image_url)}
+                />
+              </div>
+            ))}
+            {/* 如果图片少于16张，填充空位 */}
+            {galleryItems.length < 16 && Array.from({ length: 16 - galleryItems.length }).map((_, index) => (
+              <div key={`empty-${index}`} className={styles.galleryItemSingle}>
+                <div className={styles.galleryPlaceholder}>
+                  暂无图片
+                </div>
+              </div>
+            ))}
+            <div className={styles.galleryUpdateInfo}>
+              <p>每30秒自动更新</p>
+            </div>
+          </>
+        ) : (
+          <div className={styles.galleryEmpty}>
+            <p>暂无生成的作品</p>
+          </div>
+        )}
 
         {/* Lightbox Modal */}
         {galleryShowLightbox && (

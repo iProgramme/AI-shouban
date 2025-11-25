@@ -238,6 +238,7 @@ export async function getGalleryImages(limit = 20) {
         generated_image_url,
         created_at
       FROM generated_images
+      WHERE generated_image_url LIKE 'https://%'
       ORDER BY created_at DESC
       LIMIT $1
     `, [limit]);

@@ -43,10 +43,10 @@ const OriginalGenerateSection = () => {
   ]);
 
   const [bulkRedemptionOptions] = useState([
-    { id: 5, price: '100元', description: '100+20张', value: 120, title: '方案A' },
-    { id: 6, price: '200元', description: '200+70张', value: 270, title: '方案B' },
-    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '方案C' },
-    { id: 8, price: '2000元', description: '2000+2000张', value: 4000, title: '方案D' },
+    { id: 5, price: '100元', description: '100+20张', value: 120, title: '基础版' },
+    { id: 6, price: '200元', description: '200+70张', value: 270, title: '进阶版' },
+    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '高级版' },
+    { id: 8, price: '2000元', description: '2000+2000张', value: 4000, title: '专业版' },
   ]);
 
   const [paymentTab, setPaymentTab] = useState('individual'); // 'individual' for small users, 'bulk' for large users
@@ -483,6 +483,7 @@ const OriginalGenerateSection = () => {
     }
   };
 
+
   return (
     <section className={styles.generateSection}>
       <div className={styles.sectionHeader}>
@@ -842,6 +843,7 @@ const OriginalGenerateSection = () => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -1373,6 +1375,7 @@ const MultiModalGenerateSection = () => {
     }
   };
 
+
   return (
     <section className={styles.generateSection}>
       <div className={styles.sectionHeader}>
@@ -1780,6 +1783,7 @@ const MultiModalGenerateSection = () => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </section>

@@ -122,7 +122,7 @@ const nanoBananaProTexts = {
   faq3Question: '支持哪些图片格式？',
   faq3Answer: '目前支持JPG、PNG格式的图片，大小不超过5MB。建议使用正面清晰的人像图片以获得最佳效果。',
   faq4Question: '批量购买有什么优惠？',
-  faq4Answer: '20张以上可联系我们获取批量优惠价格。我们为商业用户和大量需求用户提供定制化方案。',
+  faq4Answer: '我们为游客用户和商业用户分别提供不同的优惠方案。游客用户生成数量较少，可以单张或者几十张的购买。商业用户我们提供了更加便宜的价格。更多优惠详情请联系我们。',
 
   // 页脚
   footerDescription: '专业的AI nano-banana-pro图像生成服务，让您的照片焕发新的生命力',
