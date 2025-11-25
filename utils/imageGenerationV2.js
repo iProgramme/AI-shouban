@@ -2,6 +2,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
+import http from 'http';
+import https from 'https';
 import getLocalizedTexts from './texts.js';
 import { uploadToCos } from './cos.js';
 
@@ -166,7 +168,7 @@ export async function generateImageV2(params) {
 
   try {
     // Call the Gemini API with timeout
-    const timeoutValue = resolution === "4K" ? 360000 : // 6分钟 for 4K
+    const timeoutValue = resolution === "4K" ? 600000 : // 10分钟 for 4K (增加超时时间)
                         resolution === "2K" ? 300000 : // 5分钟 for 2K
                         180000; // 3分钟 for 1K
 
@@ -178,6 +180,12 @@ export async function generateImageV2(params) {
         headers: requestHeaders,
         timeout: timeoutValue,
         maxRedirects: 0, // 避免重定向
+        maxContentLength: Infinity, // 移除响应体大小限制
+        maxBodyLength: Infinity,    // 移除请求体大小限制
+        responseType: 'json',       // 指定响应类型
+        // 添加更多配置来处理大响应
+        httpAgent: new http.Agent({ keepAlive: true }),
+        httpsAgent: new https.Agent({ keepAlive: true }),
       }
     );
 
@@ -208,18 +216,42 @@ export async function generateImageV2(params) {
       throw new Error("响应中未找到图片数据，响应结构: " + JSON.stringify(response.data).substring(0, 300));
     }
   } catch (apiError) {
-    // console.error('Gemini API 调用失败:', apiError);
+    // 检查错误类型，如果响应中包含图片数据，仍然尝试保存
+    if (apiError.response && apiError.response.data) {
+      isFromError = true; // 标记这是从错误响应中获取的数据
+      console.log('尝试从错误响应中解析图片数据，响应大小:', JSON.stringify(apiError.response.data).length);
 
-    // 检查错误类型
-    if (apiError.code === 'ECONNABORTED' || apiError.message.includes('timeout')) {
-      throw new Error('请求超时，请稍后重试');
-    } else if (apiError.code === 'ECONNRESET' || apiError.message.includes('socket hang up')) {
-      throw new Error('连接中断，请稍后重试');
-    } else {
-      const errorMessage = apiError.response ? 
-        `API错误: ${apiError.response.status} - ${JSON.stringify(apiError.response.data)}` : 
-        `API调用失败: ${apiError.message}`;
-      throw new Error(errorMessage);
+      // 检查响应中是否包含图片数据
+      if ("candidates" in apiError.response.data && apiError.response.data.candidates.length > 0) {
+        const candidate = apiError.response.data.candidates[0];
+        if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+          const parts = candidate.content.parts;
+          for (const part of parts) {
+            if (part.inlineData && part.inlineData.data) {
+              outputImageBase64 = part.inlineData.data;
+              break;
+            } else if (part.inline_data && part.inline_data.data) {
+              outputImageBase64 = part.inline_data.data;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // 如果仍然没有图片数据
+    if (!outputImageBase64) {
+      // 检查错误类型
+      if (apiError.code === 'ECONNABORTED' || apiError.message.includes('timeout')) {
+        throw new Error('请求超时，请稍后重试');
+      } else if (apiError.code === 'ECONNRESET' || apiError.message.includes('socket hang up')) {
+        throw new Error('连接中断，请稍后重试');
+      } else {
+        const errorMessage = apiError.response ?
+          `API错误: ${apiError.response.status} - ${JSON.stringify(apiError.response.data).substring(0, 300)}` :
+          `API调用失败: ${apiError.message}`;
+        throw new Error(errorMessage);
+      }
     }
   }
 
