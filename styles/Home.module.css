@@ -586,37 +586,55 @@
   color: hsl(var(--foreground));
   font-size: 1.2rem;
   font-weight: 600;
+  text-align: center;
 }
 
 .resolutionOptions {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.75rem;
   justify-content: center;
   margin-top: 0.5rem;
 }
 
 .resolutionLabel {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0.75rem 1rem;
+  justify-content: center;
+  padding: 0rem 1.5rem;
   border: 2px solid hsl(var(--border));
-  border-radius: calc(var(--radius) * 2);
+  border-radius: 8px;
   background: hsl(var(--card));
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
+  min-width: 120px;
+  height: 50px;
+  text-align: center;
+  position: relative;
 }
 
 .resolutionLabel:hover {
-  border-color: hsl(var(--primary) / 0.5);
+  border-color: hsl(var(--primary));
   background: hsl(var(--primary) / 0.1);
 }
 
 .selectedResolution {
   border-color: hsl(var(--primary));
-  background: hsl(var(--primary) / 0.15);
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+  background: hsl(var(--primary) / 0.1);
+  position: relative;
+}
+
+.selectedResolution::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid hsl(var(--primary));
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 .resolutionRadio {
@@ -625,6 +643,33 @@
 
 .resolutionText {
   color: hsl(var(--foreground));
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 0.25rem 0;
+  display: block;
+  line-height: 1.3;
+}
+
+.resolutionHint {
+  display: block;
+  font-size: 0.7rem;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  text-align: center;
+  font-weight: 400;
+  opacity: 0.8;
+  line-height: 1.3;
+  align-self: center;
+}
+
+.selectedResolution .resolutionText {
+  color: hsl(var(--primary));
+}
+
+.selectedResolution .resolutionHint {
+  color: hsl(var(--primary));
+  opacity: 1;
+  font-weight: 500;
 }
 
 .uploadArea {
@@ -1035,55 +1080,12 @@
   cursor: pointer;
 }
 
-.paymentOption:hover {
-  background: hsl(var(--muted));
-  border-color: hsl(var(--primary));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.paymentOption:active {
-  transform: translateY(0);
-}
-
-.paymentOptionPrice {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: hsl(var(--primary));
-  margin: 0.25rem 0;
+.paymentOptionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin: 0.25rem 0 0.25rem;
   text-align: center;
-}
-
-.paymentOptionDescription {
-  color: hsl(var(--muted-foreground));
-  margin: 0.25rem 0 0.5rem;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.paymentOption {
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) * 2);
-  padding: 1rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-.paymentOption:hover {
-  background: hsl(var(--muted));
-  border-color: hsl(var(--primary));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.paymentOption:active {
-  transform: translateY(0);
 }
 
 .paymentOptionPrice {

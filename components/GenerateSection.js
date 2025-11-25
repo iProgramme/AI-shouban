@@ -33,13 +33,13 @@ const OriginalGenerateSection = () => {
   const [startTime, setStartTime] = useState(null);
   const [processingTime, setProcessingTime] = useState(null);
   const [isRealTimeCounting, setIsRealTimeCounting] = useState(false);
-  const [resolution, setResolution] = useState('2K'); // 默认分辨率
+  const [resolution, setResolution] = useState('1K'); // 默认分辨率
   const [redemptionOptions] = useState([
-    { id: 1, price: '2.99元', description: '1张', value: 1 },
-    { id: 2, price: '7.99元', description: '3张', value: 3 },
-    { id: 3, price: '19.99元', description: '10张', value: 10 },
-    { id: 4, price: '联系我们', description: '20张以上', value: 20 },
-    { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true }, // 隐藏的测试套餐
+    { id: 1, price: '2.99元', description: '1张', value: 1, title: '基础版' },
+    { id: 2, price: '7.99元', description: '3张', value: 3, title: '进阶版' },
+    { id: 3, price: '19.99元', description: '10张', value: 10, title: '专业版' },
+    { id: 4, price: '联系我们', description: '20张以上', value: 20, title: '定制版' },
+    { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true, title: '测试版' }, // 隐藏的测试套餐
   ]);
 
   // 从 localStorage 获取购买历史
@@ -625,6 +625,7 @@ const OriginalGenerateSection = () => {
                                   className={styles.paymentOption}
                                   onClick={() => !paymentLoading && handlePayment(option)}
                                 >
+                                  <div className={styles.paymentOptionTitle}>{option.title}</div>
                                   <div className={styles.paymentOptionPrice}>{option.price}</div>
                                   <p className={styles.paymentOptionDescription}>{option.description}</p>
                                 </div>
@@ -639,6 +640,7 @@ const OriginalGenerateSection = () => {
                                     cursor: 'pointer'
                                   }}
                                 >
+                                  <div className={styles.paymentOptionTitle}>测试版</div>
                                   <div className={styles.paymentOptionPrice}>0.01元测试</div>
                                   <p className={styles.paymentOptionDescription}>系统测试套餐</p>
                                 </div>
@@ -708,7 +710,7 @@ const OriginalGenerateSection = () => {
             <div className={styles.resolutionSection}>
               <h3>清晰度选择</h3>
               <div className={styles.resolutionOptions}>
-                <label className={resolution === '1K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '1K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -719,7 +721,7 @@ const OriginalGenerateSection = () => {
                   />
                   <span className={styles.resolutionText}>1K (1积分)</span>
                 </label>
-                <label className={resolution === '2K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '2K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -728,9 +730,10 @@ const OriginalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>2K (2积分)</span>
+                  <span className={styles.resolutionText}>2K (1.5积分)</span>
+                  <span className={styles.resolutionHint}>需专业版/定制版</span>
                 </label>
-                <label className={resolution === '4K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -739,7 +742,8 @@ const OriginalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>4K (3积分)</span>
+                  <span className={styles.resolutionText}>4K (2积分)</span>
+                  <span className={styles.resolutionHint}>需定制版</span>
                 </label>
               </div>
             </div>
@@ -827,13 +831,13 @@ const MultiModalGenerateSection = () => {
   const [startTime, setStartTime] = useState(null);
   const [processingTime, setProcessingTime] = useState(null);
   const [isRealTimeCounting, setIsRealTimeCounting] = useState(false);
-  const [resolution, setResolution] = useState('2K'); // 默认分辨率
+  const [resolution, setResolution] = useState('1K'); // 默认分辨率
   const [redemptionOptions] = useState([
-    { id: 1, price: '2.99元', description: '1张', value: 1 },
-    { id: 2, price: '7.99元', description: '3张', value: 3 },
-    { id: 3, price: '19.99元', description: '10张', value: 10 },
-    { id: 4, price: '联系我们', description: '20张以上', value: 20 },
-    { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true }, // 隐藏的测试套餐
+    { id: 1, price: '2.99元', description: '1张', value: 1, title: '基础版' },
+    { id: 2, price: '7.99元', description: '3张', value: 3, title: '进阶版' },
+    { id: 3, price: '19.99元', description: '10张', value: 10, title: '专业版' },
+    { id: 4, price: '联系我们', description: '20张以上', value: 20, title: '定制版' },
+    { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true, title: '测试版' }, // 隐藏的测试套餐
   ]);
 
   // 从 localStorage 获取购买历史
@@ -1521,6 +1525,7 @@ const MultiModalGenerateSection = () => {
                                   className={styles.paymentOption}
                                   onClick={() => !paymentLoading && handlePayment(option)}
                                 >
+                                  <div className={styles.paymentOptionTitle}>{option.title}</div>
                                   <div className={styles.paymentOptionPrice}>{option.price}</div>
                                   <p className={styles.paymentOptionDescription}>{option.description}</p>
                                 </div>
@@ -1535,6 +1540,7 @@ const MultiModalGenerateSection = () => {
                                     cursor: 'pointer'
                                   }}
                                 >
+                                  <div className={styles.paymentOptionTitle}>测试版</div>
                                   <div className={styles.paymentOptionPrice}>0.01元测试</div>
                                   <p className={styles.paymentOptionDescription}>系统测试套餐</p>
                                 </div>
@@ -1604,7 +1610,7 @@ const MultiModalGenerateSection = () => {
             <div className={styles.resolutionSection}>
               <h3>清晰度选择</h3>
               <div className={styles.resolutionOptions}>
-                <label className={resolution === '1K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '1K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -1615,7 +1621,7 @@ const MultiModalGenerateSection = () => {
                   />
                   <span className={styles.resolutionText}>1K (1积分)</span>
                 </label>
-                <label className={resolution === '2K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '2K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -1624,9 +1630,10 @@ const MultiModalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>2K (2积分)</span>
+                  <span className={styles.resolutionText}>2K (1.5积分)</span>
+                  <span className={styles.resolutionHint}>需专业版/定制版</span>
                 </label>
-                <label className={resolution === '4K' ? styles.selectedResolution : styles.resolutionLabel}>
+                <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -1635,7 +1642,8 @@ const MultiModalGenerateSection = () => {
                     onChange={(e) => setResolution(e.target.value)}
                     className={styles.resolutionRadio}
                   />
-                  <span className={styles.resolutionText}>4K (3积分)</span>
+                  <span className={styles.resolutionText}>4K (2积分)</span>
+                  <span className={styles.resolutionHint}>需定制版</span>
                 </label>
               </div>
             </div>
