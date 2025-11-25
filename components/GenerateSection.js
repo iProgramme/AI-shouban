@@ -37,10 +37,19 @@ const OriginalGenerateSection = () => {
   const [redemptionOptions] = useState([
     { id: 1, price: '2.99元', description: '1张', value: 1, title: '基础版' },
     { id: 2, price: '7.99元', description: '3张', value: 3, title: '进阶版' },
-    { id: 3, price: '19.99元', description: '10张', value: 10, title: '专业版' },
-    { id: 4, price: '联系我们', description: '20张以上', value: 20, title: '定制版' },
+    { id: 3, price: '19.99元', description: '10张', value: 10, title: '高级版' },
+    { id: 4, price: '49.99元', description: '30张', value: 30, title: '专业版' },
     { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true, title: '测试版' }, // 隐藏的测试套餐
   ]);
+
+  const [bulkRedemptionOptions] = useState([
+    { id: 5, price: '100元', description: '100+20张', value: 120, title: '方案A' },
+    { id: 6, price: '200元', description: '200+70张', value: 270, title: '方案B' },
+    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '方案C' },
+    { id: 8, price: '2000元', description: '2000+2000张', value: 4000, title: '方案D' },
+  ]);
+
+  const [paymentTab, setPaymentTab] = useState('individual'); // 'individual' for small users, 'bulk' for large users
 
   // 从 localStorage 获取购买历史
   const [purchaseHistory, setPurchaseHistory] = useState(() => {
@@ -122,13 +131,6 @@ const OriginalGenerateSection = () => {
     setError('');
 
     try {
-      if (option.id === 4) {
-        // 如果选择批量版，直接跳转到联系页面
-        window.location.href = '/contact';
-        setShowPayment(false);
-        return;
-      }
-
       // 不传用户ID，让后端创建访客用户
       const userId = null; // 在实际应用中，这里应该是登录用户的ID
 
@@ -611,6 +613,22 @@ const OriginalGenerateSection = () => {
                       </div>
                     ) : (
                       <div className={styles.paymentOptionsWrapper}>
+                        {/* 添加tab切换 */}
+                        <div className={styles.paymentUserTypeTabs}>
+                          <button
+                            className={`${styles.paymentUserTypeTab} ${paymentTab === 'individual' ? styles.activeUserTypeTab : ''}`}
+                            onClick={() => setPaymentTab('individual')}
+                          >
+                            适合少量生图用户
+                          </button>
+                          <button
+                            className={`${styles.paymentUserTypeTab} ${paymentTab === 'bulk' ? styles.activeUserTypeTab : ''}`}
+                            onClick={() => setPaymentTab('bulk')}
+                          >
+                            适合大量生图用户
+                          </button>
+                        </div>
+
                         <div className={`${styles.paymentOptions} ${paymentLoading ? styles.loadingState : ''}`}>
                           {paymentLoading ? (
                             <div className={styles.loadingContainer}>
@@ -619,31 +637,51 @@ const OriginalGenerateSection = () => {
                             </div>
                           ) : (
                             <>
-                              {redemptionOptions.filter(option => !option.hidden).map((option) => (
-                                <div
-                                  key={option.id}
-                                  className={styles.paymentOption}
-                                  onClick={() => !paymentLoading && handlePayment(option)}
-                                >
-                                  <div className={styles.paymentOptionTitle}>{option.title}</div>
-                                  <div className={styles.paymentOptionPrice}>{option.price}</div>
-                                  <p className={styles.paymentOptionDescription}>{option.description}</p>
-                                </div>
-                              ))}
-                              {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
-                              {showTestOption && (
-                                <div
-                                  className={styles.paymentOption}
-                                  onClick={() => !paymentLoading && handleTestPayment()}
-                                  style={{
-                                    background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <div className={styles.paymentOptionTitle}>测试版</div>
-                                  <div className={styles.paymentOptionPrice}>0.01元测试</div>
-                                  <p className={styles.paymentOptionDescription}>系统测试套餐</p>
-                                </div>
+                              {paymentTab === 'individual' ? (
+                                // 少量生图用户套餐
+                                <>
+                                  {redemptionOptions.filter(option => !option.hidden).map((option) => (
+                                    <div
+                                      key={option.id}
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handlePayment(option)}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>{option.title}</div>
+                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    </div>
+                                  ))}
+                                  {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
+                                  {showTestOption && (
+                                    <div
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handleTestPayment()}
+                                      style={{
+                                        background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>测试版</div>
+                                      <div className={styles.paymentOptionPrice}>0.01元测试</div>
+                                      <p className={styles.paymentOptionDescription}>系统测试套餐</p>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                // 大量生图用户套餐
+                                <>
+                                  {bulkRedemptionOptions.map((option) => (
+                                    <div
+                                      key={option.id}
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handlePayment(option)}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>{option.title}</div>
+                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    </div>
+                                  ))}
+                                </>
                               )}
 
                               <div className={styles.contactSection}>
@@ -731,7 +769,6 @@ const OriginalGenerateSection = () => {
                     className={styles.resolutionRadio}
                   />
                   <span className={styles.resolutionText}>2K (1.5积分)</span>
-                  <span className={styles.resolutionHint}>需专业版/定制版</span>
                 </label>
                 <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
@@ -743,7 +780,6 @@ const OriginalGenerateSection = () => {
                     className={styles.resolutionRadio}
                   />
                   <span className={styles.resolutionText}>4K (2积分)</span>
-                  <span className={styles.resolutionHint}>需定制版</span>
                 </label>
               </div>
             </div>
@@ -835,10 +871,19 @@ const MultiModalGenerateSection = () => {
   const [redemptionOptions] = useState([
     { id: 1, price: '2.99元', description: '1张', value: 1, title: '基础版' },
     { id: 2, price: '7.99元', description: '3张', value: 3, title: '进阶版' },
-    { id: 3, price: '19.99元', description: '10张', value: 10, title: '专业版' },
-    { id: 4, price: '联系我们', description: '20张以上', value: 20, title: '定制版' },
+    { id: 3, price: '19.99元', description: '10张', value: 10, title: '高级版' },
+    { id: 4, price: '49.99元', description: '30张', value: 30, title: '专业版' },
     { id: 99, price: '0.01元', description: '测试套餐', value: 0.01, hidden: true, title: '测试版' }, // 隐藏的测试套餐
   ]);
+
+  const [bulkRedemptionOptions] = useState([
+    { id: 5, price: '100元', description: '100+20张', value: 120, title: '基础版' },
+    { id: 6, price: '200元', description: '200+70张', value: 270, title: '进阶版' },
+    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '专业版' },
+    { id: 8, price: '2000元', description: '2000+2000张', value: 4000, title: '专业版' },
+  ]);
+
+  const [paymentTab, setPaymentTab] = useState('individual'); // 'individual' for small users, 'bulk' for large users
 
   // 从 localStorage 获取购买历史
   const [purchaseHistory, setPurchaseHistory] = useState(() => {
@@ -920,13 +965,6 @@ const MultiModalGenerateSection = () => {
     setError('');
 
     try {
-      if (option.id === 4) {
-        // 如果选择批量版，直接跳转到联系页面
-        window.location.href = '/contact';
-        setShowPayment(false);
-        return;
-      }
-
       // 不传用户ID，让后端创建访客用户
       const userId = null; // 在实际应用中，这里应该是登录用户的ID
 
@@ -1511,6 +1549,22 @@ const MultiModalGenerateSection = () => {
                       </div>
                     ) : (
                       <div className={styles.paymentOptionsWrapper}>
+                        {/* 添加tab切换 */}
+                        <div className={styles.paymentUserTypeTabs}>
+                          <button
+                            className={`${styles.paymentUserTypeTab} ${paymentTab === 'individual' ? styles.activeUserTypeTab : ''}`}
+                            onClick={() => setPaymentTab('individual')}
+                          >
+                            适合少量生图用户
+                          </button>
+                          <button
+                            className={`${styles.paymentUserTypeTab} ${paymentTab === 'bulk' ? styles.activeUserTypeTab : ''}`}
+                            onClick={() => setPaymentTab('bulk')}
+                          >
+                            适合大量生图用户
+                          </button>
+                        </div>
+
                         <div className={`${styles.paymentOptions} ${paymentLoading ? styles.loadingState : ''}`}>
                           {paymentLoading ? (
                             <div className={styles.loadingContainer}>
@@ -1519,31 +1573,51 @@ const MultiModalGenerateSection = () => {
                             </div>
                           ) : (
                             <>
-                              {redemptionOptions.filter(option => !option.hidden).map((option) => (
-                                <div
-                                  key={option.id}
-                                  className={styles.paymentOption}
-                                  onClick={() => !paymentLoading && handlePayment(option)}
-                                >
-                                  <div className={styles.paymentOptionTitle}>{option.title}</div>
-                                  <div className={styles.paymentOptionPrice}>{option.price}</div>
-                                  <p className={styles.paymentOptionDescription}>{option.description}</p>
-                                </div>
-                              ))}
-                              {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
-                              {showTestOption && (
-                                <div
-                                  className={styles.paymentOption}
-                                  onClick={() => !paymentLoading && handleTestPayment()}
-                                  style={{
-                                    background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <div className={styles.paymentOptionTitle}>测试版</div>
-                                  <div className={styles.paymentOptionPrice}>0.01元测试</div>
-                                  <p className={styles.paymentOptionDescription}>系统测试套餐</p>
-                                </div>
+                              {paymentTab === 'individual' ? (
+                                // 少量生图用户套餐
+                                <>
+                                  {redemptionOptions.filter(option => !option.hidden).map((option) => (
+                                    <div
+                                      key={option.id}
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handlePayment(option)}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>{option.title}</div>
+                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    </div>
+                                  ))}
+                                  {/* 测试套餐按钮 - 只有在URL参数包含test=true时才显示 */}
+                                  {showTestOption && (
+                                    <div
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handleTestPayment()}
+                                      style={{
+                                        background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>测试版</div>
+                                      <div className={styles.paymentOptionPrice}>0.01元测试</div>
+                                      <p className={styles.paymentOptionDescription}>系统测试套餐</p>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                // 大量生图用户套餐
+                                <>
+                                  {bulkRedemptionOptions.map((option) => (
+                                    <div
+                                      key={option.id}
+                                      className={styles.paymentOption}
+                                      onClick={() => !paymentLoading && handlePayment(option)}
+                                    >
+                                      <div className={styles.paymentOptionTitle}>{option.title}</div>
+                                      <div className={styles.paymentOptionPrice}>{option.price}</div>
+                                      <p className={styles.paymentOptionDescription}>{option.description}</p>
+                                    </div>
+                                  ))}
+                                </>
                               )}
 
                               <div className={styles.contactSection}>
@@ -1631,7 +1705,6 @@ const MultiModalGenerateSection = () => {
                     className={styles.resolutionRadio}
                   />
                   <span className={styles.resolutionText}>2K (1.5积分)</span>
-                  <span className={styles.resolutionHint}>需专业版/定制版</span>
                 </label>
                 <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
@@ -1643,7 +1716,6 @@ const MultiModalGenerateSection = () => {
                     className={styles.resolutionRadio}
                   />
                   <span className={styles.resolutionText}>4K (2积分)</span>
-                  <span className={styles.resolutionHint}>需定制版</span>
                 </label>
               </div>
             </div>
