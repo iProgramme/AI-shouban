@@ -71,8 +71,8 @@ export async function initDb() {
     await pool.query(`
       CREATE TABLE generated_images (
         id SERIAL PRIMARY KEY,
-        original_image_url VARCHAR(500),
-        generated_image_url VARCHAR(500),
+        original_image_url TEXT,
+        generated_image_url TEXT,
         user_id INTEGER REFERENCES users(id),
         redemption_code_id INTEGER REFERENCES redemption_codes(id),
         status VARCHAR(50) DEFAULT 'success',

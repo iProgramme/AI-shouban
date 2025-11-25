@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 import getLocalizedTexts from './texts.js';
+import { uploadToCos } from './cos.js';
 
 /**
  * 使用Google Gemini API的新版图片生成函数 - 支持i2i和t2i模式
@@ -11,19 +12,20 @@ import getLocalizedTexts from './texts.js';
  * @param {string} params.code - 兑换码
  * @param {string} params.promptFromFrontend - 前端传入的提示词
  * @param {Object} params.verificationResult - 兑换码验证结果
- * @param {string} params.aspectRatio - 纵横比，默认1:1
  * @param {string} params.resolution - 分辨率，默认2K
  * @returns {Promise<Object>} 生成结果
  */
 export async function generateImageV2(params) {
-  const { 
-    imageFiles, 
-    code, 
-    promptFromFrontend, 
+  const {
+    imageFiles,
+    code,
+    promptFromFrontend,
     verificationResult,
-    aspectRatio = "1:1",
     resolution = "2K"
   } = params;
+
+  // 固定纵横比为1:1，隐藏该参数
+  const aspectRatio = "1:1";
 
   // 支持的纵横比
   const SUPPORTED_ASPECT_RATIOS = [
@@ -76,8 +78,13 @@ export async function generateImageV2(params) {
 
       // 从临时文件路径读取文件内容
       const imageBuffer = await fs.readFile(imageFile.filepath);
-      const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '');
+      const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '') || 'jpg';
       const imageBase64 = imageBuffer.toString('base64');
+
+      // 上传原图片到COS
+      const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExtension.replace('.', '')}`;
+      originalPublicPath = await uploadToCos(imageBuffer, originalFileName, `image/${fileExtension.replace('.', '')}`);
+
       imageBase64Array.push({
         base64: imageBase64,
         extension: fileExtension.replace('.', '')
@@ -90,6 +97,9 @@ export async function generateImageV2(params) {
         console.error('删除临时文件失败:', unlinkErr);
       }
     }
+  } else {
+    // 对于纯文本生成图片，设置虚拟路径
+    originalPublicPath = `/temp/original_${Date.now()}`;
   }
 
   const API_YI_KEY = process.env.API_YI_KEY;
@@ -140,7 +150,7 @@ export async function generateImageV2(params) {
   payload.generationConfig = {
     responseModalities: ["IMAGE"],
     imageConfig: {
-      aspectRatio: aspectRatio,
+      // aspectRatio: aspectRatio,
       image_size: resolution
     }
   };
@@ -160,6 +170,7 @@ export async function generateImageV2(params) {
                         resolution === "2K" ? 300000 : // 5分钟 for 2K
                         180000; // 3分钟 for 1K
 
+    console.log('Gemini API 调用开始，请求参数:', { resolution, prompt, API_YI_URL });
     const response = await axios.post(
       API_YI_URL,
       payload,
@@ -179,18 +190,13 @@ export async function generateImageV2(params) {
     // 解析响应 - 查找图片数据
     if ("candidates" in response.data && response.data.candidates.length > 0) {
       const candidate = response.data.candidates[0];
-      if ("content" in candidate && "parts" in candidate.content) {
+      if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
         const parts = candidate.content.parts;
-
-        // 遍历parts查找图片数据
         for (const part of parts) {
-          // 尝试驼峰命名 inlineData
-          if ("inlineData" in part && "data" in part.inlineData) {
+          if (part.inlineData && part.inlineData.data) {
             outputImageBase64 = part.inlineData.data;
             break;
-          }
-          // 兼容下划线命名 inline_data
-          else if ("inline_data" in part && "data" in part.inline_data) {
+          } else if (part.inline_data && part.inline_data.data) {
             outputImageBase64 = part.inline_data.data;
             break;
           }
@@ -217,8 +223,26 @@ export async function generateImageV2(params) {
     }
   }
 
-  // 将base64图片数据转为URL格式
-  let generatedPublicPath = `data:image/png;base64,${outputImageBase64}`; // 默认为PNG格式
+  // 检测图片类型，根据文件头来判断
+  let imageExtension = 'png'; // 默认为png
+  const outputBuffer = Buffer.from(outputImageBase64, 'base64');
+  const bufferHeader = outputBuffer.slice(0, 4).toString('hex').toLowerCase();
+
+  if (bufferHeader.startsWith('ffd8ff')) {
+    imageExtension = 'jpg'; // JPEG
+  } else if (bufferHeader.startsWith('89504e47')) {
+    imageExtension = 'png'; // PNG
+  } else if (bufferHeader.startsWith('47494638')) {
+    imageExtension = 'gif'; // GIF
+  } else if (bufferHeader.startsWith('49492a00') || bufferHeader.startsWith('4d4d002a')) {
+    imageExtension = 'tiff'; // TIFF
+  } else if (bufferHeader.startsWith('424d')) {
+    imageExtension = 'bmp'; // BMP
+  }
+
+  // 上传生成的图片到COS
+  const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${imageExtension}`;
+  const generatedPublicPath = await uploadToCos(outputBuffer, generatedFileName, `image/${imageExtension}`);
 
   return {
     generatedPublicPath,

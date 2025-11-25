@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 import getLocalizedTexts from './texts.js';
+import { uploadToCos } from './cos.js';
 
 /**
  * 生成图片的核心逻辑函数
@@ -45,8 +46,13 @@ export async function generateImage(params) {
 
       // 从临时文件路径读取文件内容
       const imageBuffer = await fs.readFile(imageFile.filepath);
-      const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '');
+      const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '') || 'jpg';
       const imageBase64 = imageBuffer.toString('base64');
+
+      // 上传原图片到COS
+      const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExtension.replace('.', '')}`;
+      originalPublicPath = await uploadToCos(imageBuffer, originalFileName, `image/${fileExtension.replace('.', '')}`);
+
       imageBase64Array.push({
         base64: imageBase64,
         extension: fileExtension.replace('.', '')
@@ -59,6 +65,9 @@ export async function generateImage(params) {
         console.error('删除临时文件失败:', unlinkErr);
       }
     }
+  } else {
+    // 对于纯文本生成图片，设置虚拟路径
+    originalPublicPath = `/temp/original_${Date.now()}`;
   }
 
   const API_TANGGUO_KEY = process.env.API_TANGGUO_KEY;
@@ -189,7 +198,7 @@ export async function generateImage(params) {
     const base64Match = base64Pattern.exec(fullContent);
     if (base64Match) {
       isBase64 = true;
-      imageUrl = `data:image/${base64Match[1]};base64,${base64Match[2]}`; // 默认使用png，可根据需要调整
+      imageUrl = `data:image/${base64Match[1]};base64,${base64Match[2]}`;
     }
   }
 
@@ -197,7 +206,23 @@ export async function generateImage(params) {
     throw new Error("响应中未包含有效的图片URL或base64数据");
   }
 
-  let generatedPublicPath = imageUrl; // 直接使用API返回的URL或base64字符串
+  let generatedPublicPath = imageUrl; // 初始化为API返回的URL或base64字符串
+
+  // 如果是base64格式，则上传到OSS
+  if (isBase64) {
+    const base64Match = /data:image\/([^;]+);base64,([A-Za-z0-9+/=]+)/.exec(imageUrl);
+    if (base64Match) {
+      const mimeType = base64Match[1];
+      const base64Data = base64Match[2];
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      // 上传生成的图片到COS
+      const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${mimeType.split('/')[1] || 'png'}`;
+      generatedPublicPath = await uploadToCos(imageBuffer, generatedFileName, `image/${mimeType}`);
+    }
+  }
+  // 如果返回的是外部URL，可以考虑下载后上传到OSS（可选）
+  // 这里暂时保持原URL，但您可以根据需要决定是否要将外部URL图片也转存到OSS
 
   return {
     generatedPublicPath,

@@ -576,6 +576,57 @@
   margin-right: 0.5rem;
 }
 
+/* 清晰度选择样式 */
+.resolutionSection {
+  margin-bottom: 1.5rem;
+}
+
+.resolutionSection h3 {
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.resolutionOptions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.resolutionLabel {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 2px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 2);
+  background: hsl(var(--card));
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.resolutionLabel:hover {
+  border-color: hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.1);
+}
+
+.selectedResolution {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.15);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+}
+
+.resolutionRadio {
+  display: none;
+}
+
+.resolutionText {
+  color: hsl(var(--foreground));
+}
+
 .uploadArea {
   border: 2px dashed hsl(var(--border));
   border-radius: calc(var(--radius) * 2);

@@ -39,7 +39,6 @@ export default async function handler(req, res) {
 
     const code = Array.isArray(fields.code) ? fields.code[0] : fields.code;
     const promptFromFrontend = Array.isArray(fields.prompt) ? fields.prompt[0] : fields.prompt;
-    const aspectRatio = Array.isArray(fields.aspectRatio) ? fields.aspectRatio[0] : fields.aspectRatio || "1:1";
     const resolution = Array.isArray(fields.resolution) ? fields.resolution[0] : fields.resolution || "2K";
     // 处理单张图片（图生图）或多张图片（图生图支持多图）
     let imageFiles = files.images || files.image; // 前端可能发送 images（多图）或 image（单图）
@@ -79,22 +78,35 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: verificationResult.error });
     }
 
-    // 检查是否已达到使用次数上限
-    if (verificationResult.usedCount >= verificationResult.usageCount) {
+    // 计算所需积分（API_YI需要积分）
+    const resolutionCostMap = {
+      '1K': 1,
+      '2K': 2,
+      '4K': 3
+    };
+
+    // 只有API_YI需要根据分辨率消耗积分，其他API（包括糖果姐姐）固定消耗1积分
+    const useResolutionBasedCost = true; // API_YI端点默认使用分辨率积分
+    const requiredCost = useResolutionBasedCost ? (resolutionCostMap[resolution] || 2) : 1; // 默认2K需要2积分
+
+    // 检查是否已达到使用次数上限（根据分辨率消耗计算）
+    if (verificationResult.usedCount + requiredCost > verificationResult.usageCount) {
       // 记录使用次数已达上限的失败情况
       try {
         await saveGenerationResult(
           `/temp/original_${Date.now()}`, // 虚拟原始图片路径
-          JSON.stringify({ error: 'Redemption code usage limit reached' }),
+          JSON.stringify({ error: 'Redemption code usage limit reached' }).substring(0, 499), // 限制长度避免超过数据库字段限制
           verificationResult.userId,
           verificationResult.id,
           'failed',
-          '兑换码使用次数已达上限'
+          `兑换码积分不足，当前剩余:${verificationResult.usageCount - verificationResult.usedCount}，需要:${requiredCost}`
         );
       } catch (dbError) {
         console.error('保存使用次数超限结果到数据库错误:', dbError);
       }
-      return res.status(400).json({ message: '兑换码使用次数已达上限' });
+      return res.status(400).json({
+        message: `兑换码积分不足，当前剩余:${verificationResult.usageCount - verificationResult.usedCount}，需要:${requiredCost}`
+      });
     }
 
     // 调用新的图片生成函数 (V2)
@@ -103,21 +115,60 @@ export default async function handler(req, res) {
       code,
       promptFromFrontend,
       verificationResult,
-      aspectRatio,
       resolution
     });
 
-    // 只有在圖片生成成功後才標記兌換碼為已使用
-    await useRedemptionCode(verificationResult.id);
+    // 只有在圖片生成成功後才根據分辨率消耗標記兌換碼為已使用
+    // 根据分辨率消耗相应的使用次数
+    const resolutionCostForUpdate = {
+      '1K': 1,
+      '2K': 2,
+      '4K': 3
+    };
+    const costToConsume = resolutionCostForUpdate[resolution] || 2; // 默认2K需要2积分
 
-    // 保存成功的生成結果
-    await saveGenerationResult(
-      originalPublicPath,
-      generatedPublicPath,
-      verificationResult.userId,
-      verificationResult.id,
-      'success'
-    );
+    // 更新兑换码使用次数（消耗相应积分）
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      connectionString: process.env.NEON_DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    });
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN'); // 开始事务
+
+      // 更新兑换码使用次数
+      const updateResult = await client.query(
+        'UPDATE redemption_codes SET used_count = used_count + $1 WHERE id = $2 AND used_count + $1 <= usage_count RETURNING *',
+        [costToConsume, verificationResult.id]
+      );
+
+      if (updateResult.rowCount === 0) {
+        // 如果更新失败，说明在检查后使用次数发生变化
+        await client.query('ROLLBACK');
+        client.release();
+        return res.status(400).json({ message: '兑换码使用次数已达上限' });
+      }
+
+      // 保存成功的生成結果
+      await saveGenerationResult(
+        originalPublicPath,
+        generatedPublicPath,
+        verificationResult.userId,
+        verificationResult.id,
+        'success'
+      );
+
+      await client.query('COMMIT'); // 提交事务
+    } catch (error) {
+      await client.query('ROLLBACK'); // 回滚事务
+      throw error;
+    } finally {
+      client.release();
+    }
 
     res.status(200).json({
       message: '图片生成成功',
@@ -136,13 +187,14 @@ export default async function handler(req, res) {
     };
 
     try {
+      // 尝试使用verificationResult，如果未定义则使用null值
       await saveGenerationResult(
         `/temp/original_${Date.now()}`, // 虚拟原始图片路径
-        JSON.stringify(errorDetail), // 将错误详情保存到生成图片字段
-        verificationResult.userId,
-        verificationResult.id,
+        JSON.stringify(errorDetail).substring(0, 499), // 限制长度避免超过数据库字段限制
+        typeof verificationResult !== 'undefined' ? verificationResult.userId : null,
+        typeof verificationResult !== 'undefined' ? verificationResult.id : null,
         'failed',
-        error.message // 错误消息保存到专用字段
+        (error.message || '').substring(0, 499) // 错误消息也限制长度，避免超过数据库字段限制
       );
     } catch (dbError) {
       console.error('保存失败结果到数据库错误:', dbError);

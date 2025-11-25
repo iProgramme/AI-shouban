@@ -33,6 +33,7 @@ const OriginalGenerateSection = () => {
   const [startTime, setStartTime] = useState(null);
   const [processingTime, setProcessingTime] = useState(null);
   const [isRealTimeCounting, setIsRealTimeCounting] = useState(false);
+  const [resolution, setResolution] = useState('2K'); // 默认分辨率
   const [redemptionOptions] = useState([
     { id: 1, price: '2.99元', description: '1张', value: 1 },
     { id: 2, price: '7.99元', description: '3张', value: 3 },
@@ -434,10 +435,11 @@ const OriginalGenerateSection = () => {
     }, 100); // 每100毫秒更新一次
 
     try {
-      // 创建 FormData 对象来发送文件和兑换码
+      // 创建 FormData 对象来发送文件、兑换码和分辨率
       const formData = new FormData();
       formData.append('image', image);
       formData.append('code', code);
+      formData.append('resolution', resolution);
 
       // 调用后端 AI API 生成nano-banana-pro图像
       const response = await fetch('/api/ai-generate', {
@@ -702,6 +704,46 @@ const OriginalGenerateSection = () => {
               </div>
             )}
 
+            {/* 清晰度选择 */}
+            <div className={styles.resolutionSection}>
+              <h3>清晰度选择</h3>
+              <div className={styles.resolutionOptions}>
+                <label className={resolution === '1K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="1K"
+                    checked={resolution === '1K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>1K (1积分)</span>
+                </label>
+                <label className={resolution === '2K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="2K"
+                    checked={resolution === '2K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>2K (2积分)</span>
+                </label>
+                <label className={resolution === '4K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="4K"
+                    checked={resolution === '4K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>4K (3积分)</span>
+                </label>
+              </div>
+            </div>
+
             <button
               onClick={handleGenerate}
               disabled={isProcessing || !image || !code}
@@ -785,6 +827,7 @@ const MultiModalGenerateSection = () => {
   const [startTime, setStartTime] = useState(null);
   const [processingTime, setProcessingTime] = useState(null);
   const [isRealTimeCounting, setIsRealTimeCounting] = useState(false);
+  const [resolution, setResolution] = useState('2K'); // 默认分辨率
   const [redemptionOptions] = useState([
     { id: 1, price: '2.99元', description: '1张', value: 1 },
     { id: 2, price: '7.99元', description: '3张', value: 3 },
@@ -1158,10 +1201,11 @@ const MultiModalGenerateSection = () => {
     }, 100); // 每100毫秒更新一次
 
     try {
-      // 创建 FormData 对象来发送提示词和兑换码
+      // 创建 FormData 对象来发送提示词、兑换码和分辨率
       const formData = new FormData();
       formData.append('prompt', prompt);
       formData.append('code', code);
+      formData.append('resolution', resolution);
 
       // 调用后端 AI API 生成nano-banana-pro图像
       const response = await fetch('/api/ai-generate', {
@@ -1241,6 +1285,7 @@ const MultiModalGenerateSection = () => {
         formData.append('images', img); // 使用 images 字段名，后端需要相应处理
       });
       formData.append('code', code);
+      formData.append('resolution', resolution);
 
       // 调用后端 AI API 生成nano-banana-pro图像
       const response = await fetch('/api/ai-generate', {
@@ -1554,6 +1599,46 @@ const MultiModalGenerateSection = () => {
                 </div>
               </div>
             )}
+
+            {/* 清晰度选择 */}
+            <div className={styles.resolutionSection}>
+              <h3>清晰度选择</h3>
+              <div className={styles.resolutionOptions}>
+                <label className={resolution === '1K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="1K"
+                    checked={resolution === '1K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>1K (1积分)</span>
+                </label>
+                <label className={resolution === '2K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="2K"
+                    checked={resolution === '2K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>2K (2积分)</span>
+                </label>
+                <label className={resolution === '4K' ? styles.selectedResolution : styles.resolutionLabel}>
+                  <input
+                    type="radio"
+                    name="resolution"
+                    value="4K"
+                    checked={resolution === '4K'}
+                    onChange={(e) => setResolution(e.target.value)}
+                    className={styles.resolutionRadio}
+                  />
+                  <span className={styles.resolutionText}>4K (3积分)</span>
+                </label>
+              </div>
+            </div>
 
             <button
               onClick={activeTab === 'text2image' ? handleTextToImageGenerate : handleImageToImageGenerate}

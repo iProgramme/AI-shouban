@@ -99,25 +99,92 @@ export default async function handler(req, res) {
     // 根据API_SOURCE环境变量选择生成函数
     const apiSource = process.env.API_SOURCE || 'API_TANGGUO'; // 默认使用糖果姐姐API
 
+    // 从请求中获取分辨率参数
+    const resolution = Array.isArray(fields.resolution) ? fields.resolution[0] : fields.resolution || "2K";
+
     let result;
     if (apiSource === 'API_YI') {
+      // 计算所需积分（仅API_YI需要积分）
+      const resolutionCostMap = {
+        '1K': 1,
+        '2K': 2,
+        '4K': 3
+      };
+      const requiredCost = resolutionCostMap[resolution] || 2; // 默认2K需要2积分
+
+      // 检查是否已达到使用次数上限（根据分辨率消耗计算）
+      if (verificationResult.usedCount + requiredCost > verificationResult.usageCount) {
+        // 记录使用次数已达上限的失败情况
+        try {
+          await saveGenerationResult(
+            `/temp/original_${Date.now()}`, // 虚拟原始图片路径
+            JSON.stringify({ error: 'Redemption code usage limit reached' }).substring(0, 499), // 限制长度避免超过数据库字段限制
+            verificationResult.userId,
+            verificationResult.id,
+            'failed',
+            `兑换码积分不足，当前剩余:${verificationResult.usageCount - verificationResult.usedCount}，需要:${requiredCost}`
+          );
+        } catch (dbError) {
+          console.error('保存使用次数超限结果到数据库错误:', dbError);
+        }
+        return res.status(400).json({
+          message: `兑换码积分不足，当前剩余:${verificationResult.usageCount - verificationResult.usedCount}，需要:${requiredCost}`
+        });
+      }
+
       // 使用api易的生成函数
       result = await generateImageV2({
         imageFiles,
         code,
         promptFromFrontend,
         verificationResult,
-        aspectRatio: "1:1", // 默认纵横比
-        resolution: "2K"    // 默认分辨率
+        resolution
       });
+
+      // 生成成功后，更新兑换码使用次数（消耗相应积分）
+      const { Pool } = await import('pg');
+      const pool = new Pool({
+        connectionString: process.env.NEON_DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      });
+
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN'); // 开始事务
+
+        // 更新兑换码使用次数
+        const updateResult = await client.query(
+          'UPDATE redemption_codes SET used_count = used_count + $1 WHERE id = $2 AND used_count + $1 <= usage_count RETURNING *',
+          [requiredCost, verificationResult.id]
+        );
+
+        if (updateResult.rowCount === 0) {
+          // 如果更新失败，说明在检查后使用次数发生变化
+          await client.query('ROLLBACK');
+          client.release();
+          return res.status(400).json({ message: '兑换码使用次数已达上限' });
+        }
+
+        await client.query('COMMIT'); // 提交事务
+      } catch (error) {
+        await client.query('ROLLBACK'); // 回滚事务
+        throw error;
+      } finally {
+        client.release();
+      }
     } else {
-      // 使用糖果姐姐的原始生成函数
+      // 使用糖果姐姐的原始生成函数，保持原有逻辑不变
       result = await generateImage({
         imageFiles,
         code,
         promptFromFrontend,
         verificationResult
       });
+
+      // 只消耗1积分（原有行为）
+      await useRedemptionCode(verificationResult.id);
     }
 
     const { generatedPublicPath, originalPublicPath } = result;
@@ -152,13 +219,14 @@ export default async function handler(req, res) {
     };
 
     try {
+      // 防止verificationResult未定义的问题，只在verificationResult存在时使用其值
       await saveGenerationResult(
         `/temp/original_${Date.now()}`, // 虚拟原始图片路径
-        JSON.stringify(errorDetail), // 将错误详情保存到生成图片字段
-        verificationResult.userId,
-        verificationResult.id,
+        JSON.stringify(errorDetail).substring(0, 499), // 限制长度避免超过数据库字段限制
+        typeof verificationResult !== 'undefined' ? verificationResult.userId : null,
+        typeof verificationResult !== 'undefined' ? verificationResult.id : null,
         'failed',
-        error.message // 错误消息保存到专用字段
+        (error.message || '').substring(0, 499) // 错误消息也限制长度，避免超过数据库字段限制
       );
     } catch (dbError) {
       console.error('保存失败结果到数据库错误:', dbError);
