@@ -115,7 +115,6 @@ async function uploadToImgur(buffer, fileName, imageType = 'original', mimeType 
       validateStatus: (status) => status < 500  // 接受4xx错误以便获取响应体
     };
 
-    console.log('Imgur API请求体:', IMGUR_CLIENT_ID);
     const response = await axios.post(imgurApiUrl, formData, config);
     console.log('Imgur API响应:', response.data);
 

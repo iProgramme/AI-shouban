@@ -137,14 +137,34 @@ export async function generateImageV2(params) {
 
   // 如果是i2i模式，添加图片到内容中
   if (!isTextToImage && imageBase64Array.length > 0) {
-    // 对于i2i模式，将图片作为inline_data添加
-    for (const imgData of imageBase64Array) {
+    // 检查是否已有公共URL（使用Imgur等服务上传）
+    const hasPublicUrl = originalPublicPath && !originalPublicPath.startsWith('/temp/');
+
+    if (hasPublicUrl) {
+      // 使用上传后的图片URL（适用于像Imgur这样的服务）
+      const urlExtension = originalPublicPath.split('.').pop().toLowerCase();
+      let urlMimeType = 'image/jpeg'; // 默认MIME类型
+      if (urlExtension === 'png') urlMimeType = 'image/png';
+      else if (urlExtension === 'gif') urlMimeType = 'image/gif';
+      else if (urlExtension === 'webp') urlMimeType = 'image/webp';
+
+      // 添加图片URL到请求
       payload.contents[0].parts.push({
-        inline_data: {
-          mime_type: `image/${imgData.extension}`,
-          data: imgData.base64
+        file_data: {
+          file_uri: originalPublicPath,  // 使用上传后的图片URL
+          mime_type: urlMimeType
         }
       });
+    } else {
+      // 使用内联base64数据（当前方式）
+      for (const imgData of imageBase64Array) {
+        payload.contents[0].parts.push({
+          inline_data: {
+            mime_type: `image/${imgData.extension}`,
+            data: imgData.base64
+          }
+        });
+      }
     }
   }
 
