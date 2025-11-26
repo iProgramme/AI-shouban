@@ -3,6 +3,27 @@ import { toast } from 'react-hot-toast';
 import getLocalizedTexts from '../utils/texts';
 import styles from '../styles/Home.module.css';
 
+// 判断是否需要通过代理API加载图片
+const needsProxy = (url) => {
+  if (!url) return false;
+  try {
+    const parsedUrl = new URL(url);
+    const proxyHosts = ['www.imgur.la', 'i.imgur.com', 'imgur.com'];
+    return proxyHosts.some(host => parsedUrl.hostname.includes(host));
+  } catch (e) {
+    return false;
+  }
+};
+
+// 获取带代理的图片URL
+const getProxiedImageUrl = (url) => {
+  if (!url) return url;
+  if (needsProxy(url)) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+};
+
 const texts = getLocalizedTexts();
 
 const GenerateSection = () => {
@@ -809,7 +830,7 @@ const OriginalGenerateSection = () => {
               <div className={styles.resultImages}>
                 <div className={styles.imageContainer}>
                   <img
-                    src={generatedImage}
+                    src={getProxiedImageUrl(generatedImage)}
                     alt="Generated Hand Figurine"
                     className={styles.resultImage}
                   />
@@ -828,7 +849,7 @@ const OriginalGenerateSection = () => {
                   {generatedHistory.map((item, index) => (
                     <div key={item.id} className={styles.historyItem}>
                       <img
-                        src={item.imageUrl}
+                        src={getProxiedImageUrl(item.imageUrl)}
                         alt="Generated History"
                         className={styles.historyImage}
                       />
@@ -1748,7 +1769,7 @@ const MultiModalGenerateSection = () => {
                 {generatedImages.map((img, index) => (
                   <div key={index} className={styles.imageContainer}>
                     <img
-                      src={img}
+                      src={getProxiedImageUrl(img)}
                       alt={`Generated Result ${index + 1}`}
                       className={styles.resultImage}
                     />
@@ -1768,7 +1789,7 @@ const MultiModalGenerateSection = () => {
                   {generatedHistory.map((item, index) => (
                     <div key={item.id} className={styles.historyItem}>
                       <img
-                        src={item.imageUrl}
+                        src={getProxiedImageUrl(item.imageUrl)}
                         alt="Generated History"
                         className={styles.historyImage}
                       />

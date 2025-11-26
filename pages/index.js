@@ -6,6 +6,27 @@ import styles from '../styles/Home.module.css';
 import getLocalizedTexts from '../utils/texts';
 import GenerateSection from '../components/GenerateSection';
 
+// 判断是否需要通过代理API加载图片
+const needsProxy = (url) => {
+  if (!url) return false;
+  try {
+    const parsedUrl = new URL(url);
+    const proxyHosts = ['www.imgur.la', 'i.imgur.com', 'imgur.com'];
+    return proxyHosts.some(host => parsedUrl.hostname.includes(host));
+  } catch (e) {
+    return false;
+  }
+};
+
+// 获取带代理的图片URL
+const getProxiedImageUrl = (url) => {
+  if (!url) return url;
+  if (needsProxy(url)) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+};
+
 const texts = getLocalizedTexts();
 
 export default function Home() {
@@ -502,14 +523,14 @@ export default function Home() {
             <br />
             简单、快速、效果惊艳
           </p>
-          <div className={styles.heroButtons}>
+          {/* <div className={styles.heroButtons}>
             <Link href="/" className={styles.ctaPrimary}>
               立即开始生成
             </Link>
             <Link href="/gallery" className={styles.ctaSecondary}>
               查看作品展示
             </Link>
-          </div>
+          </div> */}
         </div>
         <div className={styles.heroImage}>
           <img
@@ -715,10 +736,10 @@ function GalleryPreview({
             {galleryItems.slice(0, 16).map((item, index) => (
               <div key={`${item.id}-${index}`} className={styles.galleryItemSingle}>
                 <img
-                  src={item.generated_image_url}
+                  src={getProxiedImageUrl(item.generated_image_url)}
                   alt={`Generated artwork ${index + 1}`}
                   className={styles.galleryImageSingle}
-                  onClick={() => openLightbox(item.generated_image_url)}
+                  onClick={() => openLightbox(getProxiedImageUrl(item.generated_image_url))}
                 />
               </div>
             ))}
@@ -741,7 +762,7 @@ function GalleryPreview({
         {galleryShowLightbox && (
           <div className={styles.lightboxOverlay} onClick={closeLightbox}>
             <div className={styles.lightboxContent} onClick={(e) => e.stopPropagation()}>
-              <img src={galleryLightboxImage} alt="Enlarged view" className={styles.lightboxImage} />
+              <img src={getProxiedImageUrl(galleryLightboxImage)} alt="Enlarged view" className={styles.lightboxImage} />
               <button className={styles.lightboxClose} onClick={closeLightbox}>×</button>
             </div>
           </div>

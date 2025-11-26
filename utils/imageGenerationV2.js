@@ -170,9 +170,9 @@ export async function generateImageV2(params) {
 
   try {
     // Call the Gemini API with timeout
-    const timeoutValue = resolution === "4K" ? 600000 : // 10分钟 for 4K (增加超时时间)
-                        resolution === "2K" ? 300000 : // 5分钟 for 2K
-                        180000; // 3分钟 for 1K
+    const timeoutValue = resolution === "4K" ? 1200000 : // 20分钟 for 4K (增加超时时间)
+                        resolution === "2K" ? 600000 : // 10分钟 for 2K
+                        300000; // 5分钟 for 1K
 
     console.log('Gemini API 调用开始，请求参数:', { resolution, prompt, API_YI_URL, "payload.contents[0].parts":JSON.stringify(payload.contents[0].parts) });
     const response = await axios.post(
@@ -180,16 +180,38 @@ export async function generateImageV2(params) {
       payload,
       {
         headers: requestHeaders,
-        timeout: timeoutValue,
+        timeout: timeoutValue,  // 增加超时时间
         maxRedirects: 0, // 避免重定向
         maxContentLength: Infinity, // 移除响应体大小限制
         maxBodyLength: Infinity,    // 移除请求体大小限制
-        responseType: 'json',       // 指定响应类型
+        responseType: 'stream', // 使用流式响应以处理大文件
         // 添加更多配置来处理大响应
-        httpAgent: new http.Agent({ keepAlive: true }),
-        httpsAgent: new https.Agent({ keepAlive: true }),
+        httpAgent: new http.Agent({
+          keepAlive: true,
+          maxSockets: 2, // 限制并发连接数
+          timeout: timeoutValue
+        }),
+        httpsAgent: new https.Agent({
+          keepAlive: true,
+          maxSockets: 2, // 限制并发连接数
+          timeout: timeoutValue
+        }),
+        // 配置传输设置
+        maxRate: 0, // 不限制传输速率
       }
     );
+
+    // 将流式响应转换为JSON
+    let responseData = '';
+    for await (const chunk of response.data) {
+      responseData += chunk.toString();
+    }
+
+    // 解析JSON响应
+    const parsedResponse = JSON.parse(responseData);
+
+    // 将解析后的响应赋值给response对象，保持原有逻辑
+    response.data = parsedResponse;
 
     console.log('Gemini API 调用成功，返回结果:', { resolution, prompt, API_YI_URL, "response.data":JSON.stringify(response.data) });
 

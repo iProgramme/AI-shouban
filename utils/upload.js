@@ -116,7 +116,7 @@ async function uploadToImgur(buffer, fileName, imageType = 'original', mimeType 
     };
 
     const response = await axios.post(imgurApiUrl, formData, config);
-    console.log('Imgur API响应:', response.data);
+    console.log('Imgur API响应:', JSON.stringify(response.data));
 
     // 检查API响应状态
     if (response.data && response.data.success === false) {
