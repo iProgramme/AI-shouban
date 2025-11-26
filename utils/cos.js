@@ -41,7 +41,7 @@ export async function uploadToCos(buffer, fileName, mimeType = 'image/jpeg') {
 
     // 设置文件在COS中的路径
     const Key = `images/${fileName}`;
-    
+
     // 上传文件到COS
     const result = await client.putObject({
       Bucket,
@@ -50,7 +50,7 @@ export async function uploadToCos(buffer, fileName, mimeType = 'image/jpeg') {
       Body: buffer,
       ContentType: mimeType,
     });
-    
+
     // 返回COS中的文件URL
     return `https://${Bucket}.cos.${Region}.myqcloud.com/${Key}`;
   } catch (error) {
@@ -65,10 +65,10 @@ export async function deleteFromCos(fileName) {
     const client = createCosClient();
     const Bucket = process.env.COS_BUCKET;
     const Region = process.env.COS_REGION;
-    
+
     // 设置文件在COS中的路径
     const Key = `images/${fileName}`;
-    
+
     // 从COS删除文件
     await client.deleteObject({
       Bucket,
@@ -80,3 +80,6 @@ export async function deleteFromCos(fileName) {
     throw new Error(`COS删除失败: ${error.message}`);
   }
 }
+
+// 注意: 此文件仍然保留，但新项目中的图片上传已通过 utils/upload.js 统一管理
+// 该文件仅在 UPLOAD_PATH 设置为 tengxun_oss 时被调用

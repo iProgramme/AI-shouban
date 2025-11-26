@@ -5,7 +5,7 @@ import axios from 'axios';
 import http from 'http';
 import https from 'https';
 import getLocalizedTexts from './texts.js';
-import { uploadToCos } from './cos.js';
+import { uploadImage } from './upload.js';
 
 /**
  * 使用Google Gemini API的新版图片生成函数 - 支持i2i和t2i模式
@@ -83,9 +83,9 @@ export async function generateImageV2(params) {
       const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '') || 'jpg';
       const imageBase64 = imageBuffer.toString('base64');
 
-      // 上传原图片到COS
+      // 上传原图片到指定存储
       const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExtension.replace('.', '')}`;
-      originalPublicPath = await uploadToCos(imageBuffer, originalFileName, `image/${fileExtension.replace('.', '')}`);
+      originalPublicPath = await uploadImage(imageBuffer, originalFileName, 'original', `image/${fileExtension.replace('.', '')}`);
 
       imageBase64Array.push({
         base64: imageBase64,
@@ -272,9 +272,9 @@ export async function generateImageV2(params) {
     imageExtension = 'bmp'; // BMP
   }
 
-  // 上传生成的图片到COS
+  // 上传生成的图片到指定存储
   const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${imageExtension}`;
-  const generatedPublicPath = await uploadToCos(outputBuffer, generatedFileName, `image/${imageExtension}`);
+  const generatedPublicPath = await uploadImage(outputBuffer, generatedFileName, 'generated', `image/${imageExtension}`);
 
   return {
     generatedPublicPath,

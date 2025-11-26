@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
 import getLocalizedTexts from './texts.js';
-import { uploadToCos } from './cos.js';
+import { uploadImage } from './upload.js';
 
 /**
  * 生成图片的核心逻辑函数
@@ -49,9 +49,9 @@ export async function generateImage(params) {
       const fileExtension = path.extname(imageFile.originalFilename || imageFile.newFilename || '') || 'jpg';
       const imageBase64 = imageBuffer.toString('base64');
 
-      // 上传原图片到COS
+      // 上传原图片到指定存储
       const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExtension.replace('.', '')}`;
-      originalPublicPath = await uploadToCos(imageBuffer, originalFileName, `image/${fileExtension.replace('.', '')}`);
+      originalPublicPath = await uploadImage(imageBuffer, originalFileName, 'original', `image/${fileExtension.replace('.', '')}`);
 
       imageBase64Array.push({
         base64: imageBase64,
@@ -216,9 +216,9 @@ export async function generateImage(params) {
       const base64Data = base64Match[2];
       const imageBuffer = Buffer.from(base64Data, 'base64');
 
-      // 上传生成的图片到COS
+      // 上传生成的图片到指定存储
       const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${mimeType.split('/')[1] || 'png'}`;
-      generatedPublicPath = await uploadToCos(imageBuffer, generatedFileName, `image/${mimeType}`);
+      generatedPublicPath = await uploadImage(imageBuffer, generatedFileName, 'generated', `image/${mimeType}`);
     }
   }
   // 如果返回的是外部URL，可以考虑下载后上传到OSS（可选）

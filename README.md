@@ -55,6 +55,18 @@ PAYMENT_APPID=your_appid_here
 PAYMENT_SECRET=your_secret_key_here
 PAYMENT_API_URL=https://api.xunhupay.com/payment/do.html
 
+# Upload Configuration (图片上传配置)
+UPLOAD_PATH=tengxun_oss  # 或 imgur
+# 如果 UPLOAD_PATH=tengxun_oss，则需要以下配置：
+COS_SECRET_ID=your_cos_secret_id
+COS_SECRET_KEY=your_cos_secret_key
+COS_BUCKET=your_cos_bucket
+COS_REGION=your_cos_region
+# 如果 UPLOAD_PATH=imgur，则需要以下配置：
+IMGUR_CLIENT_ID=your_imgur_client_id
+IMGUR_TITLE=optional_image_title
+IMGUR_DESCRIPTION=optional_image_description
+
 # Application
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
@@ -136,7 +148,7 @@ npm start
 
 ## 注意事项
 
-1. **图片存储**：当前实现将图片存储在 `public/uploads` 目录。生产环境建议使用云存储服务（如 AWS S3、阿里云 OSS 等）。
+1. **图片存储**：当前实现支持通过环境变量 `UPLOAD_PATH` 配置存储方式，可选 `tengxun_oss`（腾讯云COS）或 `imgur`。系统不再使用本地 `public/uploads` 目录。
 
 2. **AI 生成**：当前实现为演示版本，实际生成功能需要集成 AI 服务（如 Stable Diffusion API 等）。
 
