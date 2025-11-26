@@ -1264,7 +1264,7 @@ const MultiModalGenerateSection = () => {
         setGeneratedImages([data.generatedImageUrl]); // 文生图只生成一张
 
         if (isClient) {
-          saveGeneratedHistory(data.generatedImageUrl); // 保存到历史记录
+          saveGeneratedHistory( `/api/proxy-image?url=${encodeURIComponent(data.generatedImageUrl)}`); // 保存到历史记录
         }
 
         setError('');

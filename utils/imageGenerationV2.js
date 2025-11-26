@@ -85,8 +85,9 @@ export async function generateImageV2(params) {
 
       // 上传原图片到指定存储
       const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExtension.replace('.', '')}`;
+      console.log("开始上传原图片到指定存储", originalFileName)
       originalPublicPath = await uploadImage(imageBuffer, originalFileName, 'original', `image/${fileExtension.replace('.', '')}`);
-
+      console.log("原图片上传成功", originalPublicPath)
       imageBase64Array.push({
         base64: imageBase64,
         extension: fileExtension.replace('.', '')
@@ -137,34 +138,15 @@ export async function generateImageV2(params) {
 
   // 如果是i2i模式，添加图片到内容中
   if (!isTextToImage && imageBase64Array.length > 0) {
-    // 检查是否已有公共URL（使用Imgur等服务上传）
-    const hasPublicUrl = originalPublicPath && !originalPublicPath.startsWith('/temp/');
-
-    if (hasPublicUrl) {
-      // 使用上传后的图片URL（适用于像Imgur这样的服务）
-      const urlExtension = originalPublicPath.split('.').pop().toLowerCase();
-      let urlMimeType = 'image/jpeg'; // 默认MIME类型
-      if (urlExtension === 'png') urlMimeType = 'image/png';
-      else if (urlExtension === 'gif') urlMimeType = 'image/gif';
-      else if (urlExtension === 'webp') urlMimeType = 'image/webp';
-
-      // 添加图片URL到请求
+    // 目前API易可能不完全支持URL方式，为确保兼容性，暂时使用内联base64数据
+    // 即使图片已上传到Imgur，我们仍然将原始图片数据以内联方式发送到API易
+    for (const imgData of imageBase64Array) {
       payload.contents[0].parts.push({
-        file_data: {
-          file_uri: originalPublicPath,  // 使用上传后的图片URL
-          mime_type: urlMimeType
+        inline_data: {
+          mime_type: `image/${imgData.extension}`,
+          data: imgData.base64
         }
       });
-    } else {
-      // 使用内联base64数据（当前方式）
-      for (const imgData of imageBase64Array) {
-        payload.contents[0].parts.push({
-          inline_data: {
-            mime_type: `image/${imgData.extension}`,
-            data: imgData.base64
-          }
-        });
-      }
     }
   }
 
@@ -192,7 +174,7 @@ export async function generateImageV2(params) {
                         resolution === "2K" ? 300000 : // 5分钟 for 2K
                         180000; // 3分钟 for 1K
 
-    console.log('Gemini API 调用开始，请求参数:', { resolution, prompt, API_YI_URL });
+    console.log('Gemini API 调用开始，请求参数:', { resolution, prompt, API_YI_URL, "payload.contents[0].parts":JSON.stringify(payload.contents[0].parts) });
     const response = await axios.post(
       API_YI_URL,
       payload,
@@ -209,7 +191,7 @@ export async function generateImageV2(params) {
       }
     );
 
-    console.log('Gemini API 调用成功，请求参数:', { aspectRatio, resolution, prompt });
+    console.log('Gemini API 调用成功，返回结果:', { resolution, prompt, API_YI_URL, "response.data":JSON.stringify(response.data) });
 
     if (response.data.error) {
       throw new Error(`Gemini API 错误: ${response.data.error.message || '未知错误'}`);
@@ -221,6 +203,7 @@ export async function generateImageV2(params) {
       if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
         const parts = candidate.content.parts;
         for (const part of parts) {
+          // 检查内联图片数据（base64格式）
           if (part.inlineData && part.inlineData.data) {
             outputImageBase64 = part.inlineData.data;
             break;
@@ -293,8 +276,16 @@ export async function generateImageV2(params) {
   }
 
   // 上传生成的图片到指定存储
+  let generatedPublicPath;
   const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${imageExtension}`;
-  const generatedPublicPath = await uploadImage(outputBuffer, generatedFileName, 'generated', `image/${imageExtension}`);
+
+  try {
+    generatedPublicPath = await uploadImage(outputBuffer, generatedFileName, 'generated', `image/${imageExtension}`);
+  } catch (uploadError) {
+    console.error('图片上传失败:', uploadError);
+    // 如果上传失败，返回错误信息而不是让整个处理流程失败
+    throw new Error(`图片生成成功但上传失败: ${uploadError.message}`);
+  }
 
   return {
     generatedPublicPath,

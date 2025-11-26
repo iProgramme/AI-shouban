@@ -80,6 +80,7 @@ export default function AdminCodes() {
     try {
       const response = await fetch('/api/gallery?limit=100'); // 获取更多图片用于分页
       const data = await response.json();
+      console.log("data.images:", data.images)
       if (response.ok) {
         setImages(data.images);
       } else {
@@ -154,7 +155,7 @@ export default function AdminCodes() {
   // 图片列表分页
   const totalPagesImages = Math.ceil(images.length / itemsPerPage);
   const startIndexImages = (currentPageImages - 1) * itemsPerPage;
-  const paginatedImages = images.slice(startIndexImages, startIndexImages + itemsPerPage);
+  const paginatedImages = images.filter(v => v.generated_image_url).slice(startIndexImages, startIndexImages + itemsPerPage).map(v => ({...v,realUrl: `/api/proxy-image?url=${encodeURIComponent(v.generated_image_url)}`}));
 
   // 订单列表分页
   const totalPagesOrders = Math.ceil(orders.length / itemsPerPage);
@@ -410,11 +411,11 @@ export default function AdminCodes() {
                     <div key={image.id} className={styles.imageCard}>
                       <div className={styles.imagePreview}>
                         <img
-                          src={image.generated_image_url}
+                          src={image.realUrl}
                           alt={`生成图片 ${image.id}`}
                           className={styles.thumbnail}
                           onError={(e) => {
-                            e.target.src = '/images/placeholder.png'; // 使用占位图
+                            // e.target.src = '/images/placeholder.png'; // 使用占位图
                           }}
                         />
                       </div>
@@ -423,7 +424,7 @@ export default function AdminCodes() {
                         <p><strong>创建时间:</strong> {formatDate(image.created_at)}</p>
                         <div className={styles.imageActions}>
                           <a
-                            href={image.generated_image_url}
+                            href={image.realUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.viewButton}
