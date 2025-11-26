@@ -19,7 +19,7 @@ export default function AdminCodes() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('list'); // 'list', 'generate', 'images', 'orders'
-  const itemsPerPage = 10;
+  const itemsPerPage = 16;
 
   // 检查登录状态
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function AdminCodes() {
   // 图片列表分页
   const totalPagesImages = Math.ceil(images.length / itemsPerPage);
   const startIndexImages = (currentPageImages - 1) * itemsPerPage;
-  const paginatedImages = images.filter(v => v.generated_image_url).slice(startIndexImages, startIndexImages + itemsPerPage).map(v => ({...v,realUrl: `/api/proxy-image?url=${encodeURIComponent(v.generated_image_url)}`}));
+  const paginatedImages = images.filter(v => v.generated_image_url).slice(startIndexImages, startIndexImages + itemsPerPage).map(v => ({...v,realUrl: `/api/proxy-image?url=${encodeURIComponent(v.generated_image_url)}`})); 
 
   // 订单列表分页
   const totalPagesOrders = Math.ceil(orders.length / itemsPerPage);
@@ -168,7 +168,15 @@ export default function AdminCodes() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('zh-CN');
+    return new Date(dateString).toLocaleString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   };
 
   const copyToClipboard = async (text) => {
@@ -424,12 +432,20 @@ export default function AdminCodes() {
                         <p><strong>创建时间:</strong> {formatDate(image.created_at)}</p>
                         <div className={styles.imageActions}>
                           <a
-                            href={image.realUrl}
+                            href={image.original_image_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.viewButton}
                           >
                             查看原图
+                          </a>
+                          <a
+                            href={image.generated_image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`${styles.viewButton} ${styles.viewButtonSecondary}`}
+                          >
+                            查看大图
                           </a>
                         </div>
                       </div>

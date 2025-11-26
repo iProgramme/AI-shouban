@@ -170,41 +170,51 @@ export async function generateImageV2(params) {
 
   try {
     // Call the Gemini API with timeout
-    const timeoutValue = resolution === "4K" ? 1200000 : // 20分钟 for 4K (增加超时时间)
-                        resolution === "2K" ? 600000 : // 10分钟 for 2K
-                        300000; // 5分钟 for 1K
+    const timeoutValue = 10 * 60 *1000;
 
     console.log('Gemini API 调用开始，请求参数:', { resolution, prompt, API_YI_URL, "payload.contents[0].parts":JSON.stringify(payload.contents[0].parts) });
-    const response = await axios.post(
-      API_YI_URL,
-      payload,
-      {
-        headers: requestHeaders,
-        timeout: timeoutValue,  // 增加超时时间
-        maxRedirects: 0, // 避免重定向
-        maxContentLength: Infinity, // 移除响应体大小限制
-        maxBodyLength: Infinity,    // 移除请求体大小限制
-        responseType: 'stream', // 使用流式响应以处理大文件
-        // 添加更多配置来处理大响应
-        httpAgent: new http.Agent({
-          keepAlive: true,
-          maxSockets: 2, // 限制并发连接数
-          timeout: timeoutValue
-        }),
-        httpsAgent: new https.Agent({
-          keepAlive: true,
-          maxSockets: 2, // 限制并发连接数
-          timeout: timeoutValue
-        }),
-        // 配置传输设置
-        maxRate: 0, // 不限制传输速率
-      }
-    );
 
-    // 将流式响应转换为JSON
+    // 创建自定义的axios实例，用于处理大响应
+    const axiosInstance = axios.create({
+      timeout: timeoutValue,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      responseType: 'stream',
+      headers: requestHeaders,
+      // 配置代理以更好地处理大数据
+      httpAgent: new http.Agent({
+        keepAlive: true,
+        maxSockets: 1, // 进一步减少并发
+        timeout: timeoutValue,
+        freeSocketTimeout: 300000 // 5分钟空闲socket超时
+      }),
+      httpsAgent: new https.Agent({
+        keepAlive: true,
+        maxSockets: 1, // 进一步减少并发
+        timeout: timeoutValue,
+        freeSocketTimeout: 300000 // 5分钟空闲socket超时
+      }),
+    });
+
+    const response = await axiosInstance.post(API_YI_URL, payload);
+
+    // 将流式响应转换为JSON，使用缓冲区以处理大数据
     let responseData = '';
+    const buffer = [];
+
     for await (const chunk of response.data) {
-      responseData += chunk.toString();
+      buffer.push(chunk);
+
+      // 如果累积的数据大小过大，及时处理以避免内存问题
+      if (buffer.length > 1000) { // 每1000个块进行一次处理
+        responseData += Buffer.concat(buffer).toString();
+        buffer.length = 0; // 清空缓冲区
+      }
+    }
+
+    // 处理剩余的缓冲区数据
+    if (buffer.length > 0) {
+      responseData += Buffer.concat(buffer).toString();
     }
 
     // 解析JSON响应
@@ -213,7 +223,7 @@ export async function generateImageV2(params) {
     // 将解析后的响应赋值给response对象，保持原有逻辑
     response.data = parsedResponse;
 
-    console.log('Gemini API 调用成功，返回结果:', { resolution, prompt, API_YI_URL, "response.data":JSON.stringify(response.data) });
+    console.log('Gemini API 调用成功，返回结果:', { resolution, prompt, API_YI_URL });
 
     if (response.data.error) {
       throw new Error(`Gemini API 错误: ${response.data.error.message || '未知错误'}`);
