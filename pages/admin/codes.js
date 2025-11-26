@@ -6,15 +6,19 @@ import styles from '../../styles/AdminCodes.module.css';
 export default function AdminCodes() {
   const [codes, setCodes] = useState([]);
   const [filteredCodes, setFilteredCodes] = useState([]);
+  const [images, setImages] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [count, setCount] = useState(1);
   const [filterCode, setFilterCode] = useState('');
   const [filterQuantity, setFilterQuantity] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageImages, setCurrentPageImages] = useState(1);
+  const [currentPageOrders, setCurrentPageOrders] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('list'); // 'generate' or 'list'
+  const [activeTab, setActiveTab] = useState('list'); // 'list', 'generate', 'images', 'orders'
   const itemsPerPage = 10;
 
   // 检查登录状态
@@ -27,8 +31,14 @@ export default function AdminCodes() {
 
   // 获取兑换码列表
   useEffect(() => {
-    fetchCodes();
-  }, []);
+    if (activeTab === 'list') {
+      fetchCodes();
+    } else if (activeTab === 'images') {
+      fetchImages();
+    } else if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
 
   // 过滤兑换码
   useEffect(() => {
@@ -60,6 +70,34 @@ export default function AdminCodes() {
         setCodes(sortedCodes);
       } else {
         setError(data.message || '获取兑换码失败');
+      }
+    } catch (err) {
+      setError('网络错误');
+    }
+  };
+
+  const fetchImages = async () => {
+    try {
+      const response = await fetch('/api/gallery?limit=100'); // 获取更多图片用于分页
+      const data = await response.json();
+      if (response.ok) {
+        setImages(data.images);
+      } else {
+        setError(data.message || '获取图片失败');
+      }
+    } catch (err) {
+      setError('网络错误');
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/get-orders');
+      const data = await response.json();
+      if (response.ok) {
+        setOrders(data.orders);
+      } else {
+        setError(data.message || '获取订单失败');
       }
     } catch (err) {
       setError('网络错误');
@@ -113,6 +151,16 @@ export default function AdminCodes() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCodes = filteredCodes.slice(startIndex, startIndex + itemsPerPage);
 
+  // 图片列表分页
+  const totalPagesImages = Math.ceil(images.length / itemsPerPage);
+  const startIndexImages = (currentPageImages - 1) * itemsPerPage;
+  const paginatedImages = images.slice(startIndexImages, startIndexImages + itemsPerPage);
+
+  // 订单列表分页
+  const totalPagesOrders = Math.ceil(orders.length / itemsPerPage);
+  const startIndexOrders = (currentPageOrders - 1) * itemsPerPage;
+  const paginatedOrders = orders.slice(startIndexOrders, startIndexOrders + itemsPerPage);
+
   const handleLogout = () => {
     localStorage.removeItem('adminLoggedIn');
     window.location.href = '/admin/login';
@@ -142,12 +190,12 @@ export default function AdminCodes() {
   return (
     <div className={styles.container}>
       <Head>
-        <title>兑换码管理</title>
-        <meta name="description" content="兑换码管理页面" />
+        <title>后台管理</title>
+        <meta name="description" content="后台管理系统" />
       </Head>
 
       <header className={styles.header}>
-        <h1>兑换码管理</h1>
+        <h1>后台管理</h1>
         <button onClick={handleLogout} className={styles.logoutButton}>退出登录</button>
       </header>
 
@@ -165,6 +213,18 @@ export default function AdminCodes() {
             onClick={() => setActiveTab('generate')}
           >
             生成兑换码
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'images' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('images')}
+          >
+            图片列表
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'orders' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            订单列表
           </button>
         </div>
 
@@ -332,6 +392,153 @@ export default function AdminCodes() {
 
             {success && <div className={styles.success}>{success}</div>}
             {error && <div className={styles.error}>{error}</div>}
+          </div>
+        )}
+
+        {/* 图片列表 Tab */}
+        {activeTab === 'images' && (
+          <div className={styles.imagesSection}>
+            <div className={styles.tableHeader}>
+              <h2>图片列表</h2>
+              <span className={styles.totalCount}>共 {images.length} 张图片</span>
+            </div>
+
+            <div className={styles.galleryContainer}>
+              {paginatedImages.length > 0 ? (
+                <div className={styles.galleryGrid}>
+                  {paginatedImages.map((image) => (
+                    <div key={image.id} className={styles.imageCard}>
+                      <div className={styles.imagePreview}>
+                        <img
+                          src={image.generated_image_url}
+                          alt={`生成图片 ${image.id}`}
+                          className={styles.thumbnail}
+                          onError={(e) => {
+                            e.target.src = '/images/placeholder.png'; // 使用占位图
+                          }}
+                        />
+                      </div>
+                      <div className={styles.imageInfo}>
+                        <p><strong>ID:</strong> {image.id}</p>
+                        <p><strong>创建时间:</strong> {formatDate(image.created_at)}</p>
+                        <div className={styles.imageActions}>
+                          <a
+                            href={image.generated_image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.viewButton}
+                          >
+                            查看原图
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.noData}>暂无图片数据</div>
+              )}
+            </div>
+
+            {/* 图片列表分页 */}
+            {totalPagesImages > 1 && (
+              <div className={styles.pagination}>
+                <button
+                  onClick={() => setCurrentPageImages(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPageImages === 1}
+                  className={styles.pageButton}
+                >
+                  上一页
+                </button>
+
+                <span className={styles.pageInfo}>
+                  第 {currentPageImages} 页，共 {totalPagesImages} 页
+                </span>
+
+                <button
+                  onClick={() => setCurrentPageImages(prev => Math.min(prev + 1, totalPagesImages))}
+                  disabled={currentPageImages === totalPagesImages}
+                  className={styles.pageButton}
+                >
+                  下一页
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 订单列表 Tab */}
+        {activeTab === 'orders' && (
+          <div className={styles.tableSection}>
+            <div className={styles.tableHeader}>
+              <h2>订单列表</h2>
+              <span className={styles.totalCount}>共 {orders.length} 条订单</span>
+            </div>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>订单ID</th>
+                    <th>金额</th>
+                    <th>状态</th>
+                    <th>用户ID</th>
+                    <th>创建时间</th>
+                    <th>更新时间</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedOrders.length > 0 ? (
+                    paginatedOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.order_id}</td>
+                        <td>{order.amount}</td>
+                        <td>
+                          {order.status === 'paid' ? (
+                            <span className={styles.statusActive}>已支付</span>
+                          ) : order.status === 'pending' ? (
+                            <span className={styles.statusPending}>待支付</span>
+                          ) : (
+                            <span className={styles.statusUsed}>{order.status}</span>
+                          )}
+                        </td>
+                        <td>{order.user_id || '-'}</td>
+                        <td>{formatDate(order.created_at)}</td>
+                        <td>{formatDate(order.updated_at)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className={styles.noData}>暂无订单数据</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 订单列表分页 */}
+            {totalPagesOrders > 1 && (
+              <div className={styles.pagination}>
+                <button
+                  onClick={() => setCurrentPageOrders(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPageOrders === 1}
+                  className={styles.pageButton}
+                >
+                  上一页
+                </button>
+
+                <span className={styles.pageInfo}>
+                  第 {currentPageOrders} 页，共 {totalPagesOrders} 页
+                </span>
+
+                <button
+                  onClick={() => setCurrentPageOrders(prev => Math.min(prev + 1, totalPagesOrders))}
+                  disabled={currentPageOrders === totalPagesOrders}
+                  className={styles.pageButton}
+                >
+                  下一页
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
