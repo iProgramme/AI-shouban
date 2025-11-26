@@ -700,12 +700,6 @@ function GalleryPreview({
   // 组件挂载时加载图片
   useEffect(() => {
     loadGalleryImages();
-
-    // 设置定时器，每30秒更新一次
-    const interval = setInterval(loadGalleryImages, 30000);
-
-    // 清理定时器
-    return () => clearInterval(interval);
   }, []);
 
   if (appType === 'default') {
@@ -736,9 +730,6 @@ function GalleryPreview({
                 </div>
               </div>
             ))}
-            <div className={styles.galleryUpdateInfo}>
-              <p>每30秒自动更新</p>
-            </div>
           </>
         ) : (
           <div className={styles.galleryEmpty}>

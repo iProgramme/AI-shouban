@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
     "axios": "^1.13.2",
     "cos-nodejs-sdk-v5": "^2.15.4",
     "formidable": "^3.5.4",

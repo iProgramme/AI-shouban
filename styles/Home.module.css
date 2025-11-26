@@ -519,15 +519,6 @@
   font-style: italic;
 }
 
-.galleryUpdateInfo {
-  grid-column: 1 / -1; /* 横跨所有列 */
-  text-align: center;
-  font-size: 0.8rem;
-  color: hsl(var(--muted-foreground));
-  margin-top: 0.5rem;
-  font-style: italic;
-}
-
 .galleryLoading {
   grid-column: 1 / -1; /* 横跨所有列 */
   text-align: center;
