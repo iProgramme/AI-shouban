@@ -1458,7 +1458,7 @@ const MultiModalGenerateSection = () => {
             </div>
           )}
 
-          <div className={styles.uploadSection}>
+          {activeTab === 'image2image' && (<div className={styles.uploadSection}>
             <h3>{texts.uploadSectionTitle}</h3>
             <div className={styles.multiImageUpload}>
               <div className={styles.previewsContainer}>
@@ -1502,6 +1502,7 @@ const MultiModalGenerateSection = () => {
               )}
             </div>
           </div>
+          )}
 
           <div className={styles.codeSection}>
             <h3>{texts.codeSectionTitle}</h3>
