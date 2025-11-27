@@ -873,7 +873,7 @@ const OriginalGenerateSection = () => {
 
 // 支持文生图/图生图的组件内容 (当 APP_TYPE == default 时)
 const MultiModalGenerateSection = () => {
-  const [activeTab, setActiveTab] = useState('text2image'); // 'text2image' or 'image2image'
+  const [activeTab, setActiveTab] = useState('image2image'); // 'text2image' or 'image2image'
   const [prompt, setPrompt] = useState(''); // 提示词输入
   const [image, setImage] = useState(null); // 当前选中的图片
   const [previews, setPreviews] = useState([]); // 图生图预览图片数组
@@ -902,7 +902,7 @@ const MultiModalGenerateSection = () => {
   const [bulkRedemptionOptions] = useState([
     { id: 5, price: '100元', description: '100+20张', value: 120, title: '基础版' },
     { id: 6, price: '200元', description: '200+70张', value: 270, title: '进阶版' },
-    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '专业版' },
+    { id: 7, price: '1000元', description: '1000+700张', value: 1700, title: '高级版' },
     { id: 8, price: '2000元', description: '2000+2000张', value: 4000, title: '专业版' },
   ]);
 
@@ -1448,54 +1448,60 @@ const MultiModalGenerateSection = () => {
                   placeholder="请输入生成图片的描述..."
                   className={styles.promptInput}
                 />
-              </div>
-
-              <div className={styles.uploadSection}>
-                <h3>{texts.uploadSectionTitle}</h3>
-                <div className={styles.multiImageUpload}>
-                  <div className={styles.previewsContainer}>
-                    {previews.map((preview, index) => (
-                      <div key={index} className={styles.previewItem}>
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className={styles.previewImage}
-                        />
-                        <button
-                          className={styles.removeButton}
-                          onClick={(e) => {
-                            e.stopPropagation(); // 防止触发预览项点击事件
-                            removeImage(index);
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                    {previews.length < 9 && (
-                      <div className={`${styles.previewItem} ${styles.uploadPlaceholder}`}>
-                        <input
-                          type="file"
-                          id="multiImageUpload"
-                          accept="image/*"
-                          multiple
-                          onChange={handleImageUpload}
-                          className={styles.fileInput}
-                        />
-                        <label htmlFor="multiImageUpload" className={styles.uploadLabel}>
-                          <div className={styles.uploadIcon}>+</div>
-                          <div className={styles.uploadText}>选择图片</div>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                  {previews.length > 0 && (
-                    <p className={styles.imageCount}>已选择 {previews.length} 张图片</p>
-                  )}
-                </div>
+                <button
+                  onClick={() => setPrompt(texts.imageGenerationPrompt)}
+                  className={styles.fillPromptButton}
+                >
+                  {texts.imageGenerationTemplate}
+                </button>
               </div>
             </div>
           )}
+
+          <div className={styles.uploadSection}>
+            <h3>{texts.uploadSectionTitle}</h3>
+            <div className={styles.multiImageUpload}>
+              <div className={styles.previewsContainer}>
+                {previews.map((preview, index) => (
+                  <div key={index} className={styles.previewItem}>
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className={styles.previewImage}
+                    />
+                    <button
+                      className={styles.removeButton}
+                      onClick={(e) => {
+                        e.stopPropagation(); // 防止触发预览项点击事件
+                        removeImage(index);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {previews.length < 9 && (
+                  <div className={`${styles.previewItem} ${styles.uploadPlaceholder}`}>
+                    <input
+                      type="file"
+                      id="multiImageUpload"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className={styles.fileInput}
+                    />
+                    <label htmlFor="multiImageUpload" className={styles.uploadLabel}>
+                      <div className={styles.uploadIcon}>+</div>
+                      <div className={styles.uploadText}>选择图片</div>
+                    </label>
+                  </div>
+                )}
+              </div>
+              {previews.length > 0 && (
+                <p className={styles.imageCount}>已选择 {previews.length} 张图片</p>
+              )}
+            </div>
+          </div>
 
           <div className={styles.codeSection}>
             <h3>{texts.codeSectionTitle}</h3>

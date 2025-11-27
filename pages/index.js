@@ -514,12 +514,12 @@ export default function Home() {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            将您的照片
+            {texts.heroTitle1}
             <br />
-            <span className={styles.heroTitleHighlight}>转换为精美nano-banana-pro</span>
+            <span className={styles.heroTitleHighlight}>{texts.heroTitle2}</span>
           </h1>
           <p className={styles.heroDescription}>
-            使用先进的AI技术，只需上传一张照片，即可生成专业级nano-banana-pro图像。
+            {texts.heroDescription}
             <br />
             简单、快速、效果惊艳
           </p>

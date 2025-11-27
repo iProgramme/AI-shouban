@@ -2211,7 +2211,7 @@
 
 .promptInput {
   width: 100%;
-  min-height: 120px;
+  min-height: 135px;
   padding: 1rem;
   border: 2px solid hsl(var(--input));
   border-radius: calc(var(--radius) * 2);
@@ -2227,6 +2227,27 @@
   outline: none;
   border-color: hsl(var(--ring));
   box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.fillPromptButton {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: calc(var(--radius) * 2);
+  font-weight: 500;
+  font-size: 0.875rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.fillPromptButton:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  transform: translateY(-1px);
+  background: hsl(var(--muted));
 }
 
 .imageToImageSection {

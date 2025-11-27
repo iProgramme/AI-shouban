@@ -281,7 +281,8 @@ const nanoBananaProTexts = {
 
   // 生成提示词
   imageGenerationPrompt: '请将这张人物照片转换为精美的nano-banana-pro风格图像。请保持原始人物的特征，但以nano-banana-pro材质和风格呈现。',
-
+  // 生成模板
+  imageGenerationTemplate: 'nano-banana-pro风格照片-一键填入',
   // 其他
   logoText: 'nano-banana-pro'
 };
