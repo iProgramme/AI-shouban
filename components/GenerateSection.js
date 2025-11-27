@@ -1730,7 +1730,7 @@ const MultiModalGenerateSection = () => {
                   />
                   <span className={styles.resolutionText}>2K (2积分)</span>
                 </label>
-                <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
+                {/* <label className={resolution === '4K' ? styles.selectedResolution+' '+styles.resolutionLabel : styles.resolutionLabel}>
                   <input
                     type="radio"
                     name="resolution"
@@ -1740,7 +1740,7 @@ const MultiModalGenerateSection = () => {
                     className={styles.resolutionRadio}
                   />
                   <span className={styles.resolutionText}>4K (3积分)</span>
-                </label>
+                </label> */}
               </div>
             </div>
 

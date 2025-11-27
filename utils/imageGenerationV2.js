@@ -8,6 +8,37 @@ import getLocalizedTexts from './texts.js';
 import { uploadImage } from './upload.js';
 
 /**
+ * 异步保存图片到本地
+ * @param {Buffer} imageBuffer - 图片Buffer
+ * @param {string} imageExtension - 图片扩展名
+ * @returns {Promise<string>} 本地保存路径
+ */
+async function saveImageLocally(imageBuffer, imageExtension) {
+  try {
+    // 确保public/images/generated目录存在
+    const localDir = path.join(process.cwd(), 'public', 'images', 'generated');
+
+    // 在Next.js环境中，我们可能需要使用不同的路径策略
+    // 对于服务端代码，使用相对路径或环境定义的路径
+    await fs.mkdir(localDir, { recursive: true });
+
+    // 生成唯一文件名
+    const fileName = `local_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${imageExtension}`;
+    const localPath = path.join(localDir, fileName);
+
+    // 异步保存图片到本地
+    await fs.writeFile(localPath, imageBuffer);
+
+    // 返回相对路径，供Next.js访问
+    return path.join('/images', 'generated', fileName);
+  } catch (error) {
+    console.error('保存图片到本地失败:', error);
+    // 即使本地保存失败，也不应该影响主要的生成流程
+    return null;
+  }
+}
+
+/**
  * 使用Google Gemini API的新版图片生成函数 - 支持i2i和t2i模式
  * @param {Object} params - 生成参数
  * @param {File[]} params.imageFiles - 图片文件数组（可选，如果不提供则为t2i模式）
@@ -251,6 +282,7 @@ export async function generateImageV2(params) {
       throw new Error("响应中未找到图片数据，响应结构: " + JSON.stringify(response.data).substring(0, 300));
     }
   } catch (apiError) {
+    console.log("Gemini API 调用失败,api报错:",apiError)
     // 检查错误类型，如果响应中包含图片数据，仍然尝试保存
     if (apiError.response && apiError.response.data) {
       isFromError = true; // 标记这是从错误响应中获取的数据
@@ -310,6 +342,18 @@ export async function generateImageV2(params) {
   // 上传生成的图片到指定存储
   let generatedPublicPath;
   const generatedFileName = `generated_${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${imageExtension}`;
+
+
+  // 异步保存图片到本地（不阻塞主流程）
+  // 使用setTimeout以在主流程完成后异步执行
+  setTimeout(async () => {
+    try {
+      await saveImageLocally(outputBuffer, imageExtension);
+      console.log('图片已异步保存到本地');
+    } catch (localSaveError) {
+      console.error('异步保存图片到本地时发生错误:', localSaveError);
+    }
+  }, 0);
 
   try {
     generatedPublicPath = await uploadImage(outputBuffer, generatedFileName, 'generated', `image/${imageExtension}`);
