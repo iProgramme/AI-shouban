@@ -1896,10 +1896,6 @@
     font-size: 1rem;
   }
 
-  .heroImage {
-    display: none; /* Hide hero image in small screens to simplify layout */
-  }
-
   /* How It Works Mobile */
   .steps {
     flex-direction: column;

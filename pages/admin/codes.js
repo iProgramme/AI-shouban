@@ -155,7 +155,7 @@ export default function AdminCodes() {
   // 图片列表分页
   const totalPagesImages = Math.ceil(images.length / itemsPerPage);
   const startIndexImages = (currentPageImages - 1) * itemsPerPage;
-  const paginatedImages = images.filter(v => v.generated_image_url).slice(startIndexImages, startIndexImages + itemsPerPage).map(v => ({...v,realUrl: `/api/proxy-image?url=${encodeURIComponent(v.generated_image_url)}`})); 
+  const paginatedImages = images.filter(v => v.generated_image_url).slice(startIndexImages, startIndexImages + itemsPerPage).map(v => ({...v,realUrl: v.generated_image_url})); 
 
   // 订单列表分页
   const totalPagesOrders = Math.ceil(orders.length / itemsPerPage);
