@@ -21,9 +21,9 @@ const needsProxy = (url) => {
 // 获取带代理的图片URL
 const getProxiedImageUrl = (url) => {
   if (!url) return url;
-  if (needsProxy(url)) {
-    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
-  }
+  // if (needsProxy(url)) {
+  //   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  // }
   return url;
 };
 

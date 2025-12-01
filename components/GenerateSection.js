@@ -18,9 +18,9 @@ const needsProxy = (url) => {
 // 获取带代理的图片URL
 const getProxiedImageUrl = (url) => {
   if (!url) return url;
-  if (needsProxy(url)) {
-    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
-  }
+  // if (needsProxy(url)) {
+  //   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  // }
   return url;
 };
 
@@ -1285,7 +1285,7 @@ const MultiModalGenerateSection = () => {
         setGeneratedImages([data.generatedImageUrl]); // 文生图只生成一张
 
         if (isClient) {
-          saveGeneratedHistory( `/api/proxy-image?url=${encodeURIComponent(data.generatedImageUrl)}`); // 保存到历史记录
+          saveGeneratedHistory(data.generatedImageUrl); // 保存到历史记录
         }
 
         setError('');
